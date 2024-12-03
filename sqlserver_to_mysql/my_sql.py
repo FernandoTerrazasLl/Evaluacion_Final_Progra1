@@ -1,22 +1,21 @@
 import mysql.connector
+from mysql.connector import Error
 
-conn_mysql = mysql.connector.connect(
-    host="final",  # O el nombre de tu servidor MySQL
-    user="root",  # O el nombre de usuario de MySQL
-)
+try:
+    mydb = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            port='3306',
+            password='Fernando2420'
+        )
 
-# Crear un cursor para ejecutar los comandos SQL
-cursor_mysql = conn_mysql.cursor()
+    if mydb.is_connected():
+        mycursor = mydb.cursor()
+        mycursor.execute("CREATE DATABASE IF NOT EXISTS BibliotecaUniversidad;")
+        mycursor.execute("USE BibliotecaUniversidad;")
 
-# Crear la base de datos (asegúrate de que el nombre de la base de datos no exista ya)
-nombre_base_de_datos = "BibliotecaUniversitariaMySql"
-cursor_mysql.execute(f"DROP DATABASE IF EXISTS {nombre_base_de_datos}")
-cursor_mysql.execute(f"CREATE DATABASE {nombre_base_de_datos}")
+except Error as e:
+    print(f"Error: {e}")
 
-# Confirmar los cambios
-conn_mysql.commit()
 
-print(f"Base de datos {nombre_base_de_datos} creada exitosamente.")
 
-cursor_mysql.close()
-conn_mysql.close()

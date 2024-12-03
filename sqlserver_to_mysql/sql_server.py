@@ -16,13 +16,10 @@ try:
 except:
     print('Error')
 
-cursor = conn.cursor()
-cursor.execute("Select * from categoria")
-row = cursor.fetchall()
+cursor_server = conn.cursor()
+#cursor.execute("Select * from categoria")
+#row = cursor.fetchall()
 
-for record in row:
-    print(record)
+#for record in row:
+ #   print(record)
 
-
-cursor.close()
-conn.close()
