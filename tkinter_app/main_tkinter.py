@@ -36,7 +36,17 @@ class BibliotecaApp:
         try:
             cursor.execute(f"SELECT * FROM {table_name}")
             rows=cursor.fetchall()
+            tree.delete(*tree.get_children())
+            for row in rows:
+                tree.insert("", "end", values=row)
         except Exception as e:
             messsagebox.showerror("Error", f"No se pudo recuperar datos de {table_name}: {e}")
         finally:
             conn.close()
+
+    def add_data(self, tree, table_name, columns, values):
+        conn=self.connect_database()
+        if not conn: 
+            return
+        
+        cursor=conn.cursor()
