@@ -1,31 +1,42 @@
 #RECORDAR HACERLO MODULAR EL CODIGO (CREAR MULTIPLES ARCHIVOS PY PARA FUNCIONES O CLASES MAS IMPORTANTES)
 import tkinter as tk
 from tkinter import ttk, messsagebox 
+import mysql.connector
 
-class App:
+class BibliotecaApp:
     def _init_(self, root):
         self.root=root
         self.root.title("Gestión de Biblioteca Universitaria")
-        #insertar conexion a db
+        self.root.geometry("800x600")
+        self.configure_styles()
+        self.create_main_menu()
 
-        self.create_widgets()
-
-    def create_widgets(self):
-        self.tree=ttk.Treeview(self.root, columns=("ID", "Nombre", "Autor"), show="headings")
-        self.tree.heading("ID", text="ID")
-        self.tree.heading("Nombre", text="Nombre")
-        self.tree.heading("Autor", text="Autor")
-        self.tree.pack(fill=tk.BOTH, expand=True)
-    
-
-    def load_records(self):
-        for row in self.tree.get_children():
-            self.tree.delete(row)
+    def configure_styles(self):
+        style=ttk.Style()
         
-    def add_records(self):
-        self.record_form("Agregar Registro")
+    def connect_database(self):
+        try:
+            conn=mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password= #insertar contraseña de la conexion
+                database="BibliotecaUniversitaria"
+            )
+            return conn
+        except mysql.connector.Error as err:
+            messsagebox.showerror("Error", f"Error conectando a MySQL: {err}")
+            return None
     
-    def edit_record(self):
-        selected_item=self.tree.selection()
-
-    
+    def fetch_data(self, tree, table_name):
+        conn=self.connect_database()
+        if not conn:
+            return 
+        
+        cursor=conn.cursor()
+        try:
+            cursor.execute(f"SELECT * FROM {table_name}")
+            rows=cursor.fetchall()
+        except Exception as e:
+            messsagebox.showerror("Error", f"No se pudo recuperar datos de {table_name}: {e}")
+        finally:
+            conn.close()
