@@ -14,12 +14,6 @@ try:
         f"Trusted_Connection=yes;"
     )
 except:
-    print('Error')
+    print('Connection error in sqlserver')
 
 cursor_server = conn.cursor()
-#cursor.execute("Select * from categoria")
-#row = cursor.fetchall()
-
-#for record in row:
- #   print(record)
-
