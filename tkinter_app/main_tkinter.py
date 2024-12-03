@@ -50,3 +50,12 @@ class BibliotecaApp:
             return
         
         cursor=conn.cursor()
+        try:
+            placeholders=", ".join(["%s"] * len(values))
+            cursor.execute(f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})", values)
+            conn.commit()
+            messsagebox.showinfo("Exito", f"Registro agregado a {table_name}.")
+        except Exception as e:
+            messsagebox.showerror("Error", f"No se pudo agregar el registro a {table_name}:{e}")
+        finally:
+            conn.close()
