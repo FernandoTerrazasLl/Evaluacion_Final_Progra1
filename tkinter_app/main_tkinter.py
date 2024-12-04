@@ -1,5 +1,4 @@
 #RECORDAR HACERLO MODULAR EL CODIGO (CREAR MULTIPLES ARCHIVOS PY PARA FUNCIONES O CLASES MAS IMPORTANTES)
-#RECORDAR HACERLO MODULAR EL CODIGO (CREAR MULTIPLES ARCHIVOS PY PARA FUNCIONES O CLASES MAS IMPORTANTES)
 import tkinter as tk
 from tkinter import ttk, messagebox 
 import mysql.connector
@@ -16,8 +15,9 @@ class BibliotecaApp:
             conn=mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password= "#insertar contraseña de la conexion",
-                database="BibliotecaUniversitaria"
+                password= "ElsMymc189",
+                auth_plugin='mysql_native_password',
+                database="BibliotecaUniversidad"
             )
             return conn
         except mysql.connector.Error as err:
@@ -109,13 +109,61 @@ class BibliotecaApp:
                 values=[entry.get() for entry in entry_widgets.values()]
                 self.add_data(tree, table_name, columns[1:], values)
 
-            add_button = tk.Button(frame, text="Agregar", command=handle_add)
+            add_button=tk.Button(frame, text="Agregar", command=handle_add)
             add_button.grid(row=len(columns), column=0, pady=10)
 
         elif action=="eliminar":
-            delete_button = tk.Button(self.root, text="Eliminar",
+            delete_button=tk.Button(self.root, text="Eliminar",
                                       command=lambda: self.delete_data(tree, table_name, id_column))
             delete_button.pack(pady=10)
 
         back_button=tk.Button(self.root, text="Volver", command=lambda: self.create_table_menu(action))
         back_button.pack(pady=10)
+
+    def create_table_menu(self, action):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        tables={
+            "Usuario": ["usuario_id", "nombre", "apellido", "correo", "tipo_usuario","carrera", "fecha_registro"],
+            "Bibliotecario": ["bibliotecario_id", "nombre", "apellido", "fecha_contratacion", "correo", "fecha_despido"],
+            "Prestamo": ["prestamo_id", "usuario_id", "fecha_prestamo", "fecha_devolucion", "estado", "fecha_limite_devolucion", "bibliotecario_id"],
+            "Detalle_Prestamo": ["detalle_id", "prestamo_id", "libro_id", "cantidad"],
+            "Libro": ["libro_id", "titulo", "anio_publicacion", "editorial", "tipo_texto_id", "categoria_id",
+                      "copias_totales"],
+            "Autor": ["autor_id", "nombre", "apellido"],
+            "Libro_Autor": ["libro_id", "autor_id"],
+            "Categoria": ["categoria_id", "nombre_categoria"],
+            "Tipo_Texto": ["tipo_texto_id", "nombre_tipo"]
+        }
+
+        for table_name, columns in tables.items():
+            tk.Button(
+                self.root,
+                text=table_name,
+                width=20,
+                command=lambda t=table_name, c=columns: self.create_action_interface(action, t, c, c[0])
+            ).pack(pady=5)
+
+        back_button=tk.Button(self.root, text="Volver", command=self.create_main_menu)
+        back_button.pack(pady=10)
+
+    def create_main_menu(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        tk.Label(self.root, text="Sistema de Gestión de Biblioteca Universitaria", font=("Arial", 20)).pack(pady=20)
+
+        actions=["visualizar", "agregar", "modificar", "eliminar"]
+        for action in actions:
+            tk.Button(
+                self.root,
+                text=action.capitalize(),
+                width=20,
+                command=lambda a=action: self.create_table_menu(a)
+            ).pack(pady=5)
+
+if __name__=="__main__":
+    root=tk.Tk()
+    app=BibliotecaApp(root)
+    root.mainloop()
