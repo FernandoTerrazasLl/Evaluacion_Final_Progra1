@@ -15,7 +15,7 @@ class BibliotecaApp:
             conn=mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password= "ElsMymc189",
+                password= "#CONTRASEÑA",
                 auth_plugin='mysql_native_password',
                 database="BibliotecaUniversidad"
             )
@@ -48,7 +48,7 @@ class BibliotecaApp:
         
         cursor=conn.cursor()
         try:
-            placeholders=", ".join(["%s"] * len(values))
+            placeholders=", ".join(["%s"]*len(values))
             cursor.execute(f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})", values)
             conn.commit()
             messagebox.showinfo("Exito", f"Registro agregado a {table_name}.")
@@ -80,6 +80,26 @@ class BibliotecaApp:
         finally:
             conn.close()
  
+    def update_data(self, tree, table_name, columns, values, record_id):
+        conn=self.connect_database()
+        if not conn:
+            return
+        
+        cursor=conn.cursor()
+        try:
+            set_clause=", ".join([f"{col}=%s" for col in columns])
+            cursor.execute(
+                f"UPDATE {table_name} SET {set_clause} WHERE {columns[0]}=%s",
+                values+[record_id]
+            )
+            conn.commit()
+            messagebox.showinfo("Éxito", f"Registro actualizado en {table_name}.")
+            self.fetch_data(tree, table_name)
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo actualizar el registro de {table_name}: {e}")
+        finally:
+            conn.close()
+
     def create_action_interface(self, action, table_name, columns, id_column):
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -94,31 +114,59 @@ class BibliotecaApp:
 
         self.fetch_data(tree, table_name)
 
-        if action=="agregar":
-            frame=tk.Frame(self.root)
-            frame.pack(pady=10)
-
-            entry_widgets={}
-            for i, col in enumerate(columns[1:]):  # Excluir ID en la entrada
-                tk.Label(frame, text=col).grid(row=i, column=0, padx=5, pady=2)
-                entry=tk.Entry(frame)
-                entry.grid(row=i, column=1, padx=5, pady=2)
-                entry_widgets[col]=entry
-
-            def handle_add():
-                values=[entry.get() for entry in entry_widgets.values()]
-                self.add_data(tree, table_name, columns[1:], values)
-
-            add_button=tk.Button(frame, text="Agregar", command=handle_add)
-            add_button.grid(row=len(columns), column=0, pady=10)
-
-        elif action=="eliminar":
-            delete_button=tk.Button(self.root, text="Eliminar",
-                                      command=lambda: self.delete_data(tree, table_name, id_column))
+        if action=="eliminar":
+            delete_button=tk.Button(
+                self.root, text="Eliminar",
+                command=lambda: self.delete_data(tree, table_name, id_column)
+            )
             delete_button.pack(pady=10)
 
         back_button=tk.Button(self.root, text="Volver", command=lambda: self.create_table_menu(action))
         back_button.pack(pady=10)
+
+        if action=="agregar" or action=="modificar":
+            frame=tk.Frame(self.root)
+            frame.pack(pady=10)
+
+            entry_widgets={}
+            for i, col in enumerate(columns):
+                tk.Label(frame, text=col).grid(row=i, column=0, padx=5, pady=2)
+                entry = tk.Entry(frame)
+                entry.grid(row=i, column=1, padx=5, pady=2)
+                entry_widgets[col]=entry
+
+            if action == "agregar":
+                def handle_add():
+                    values=[entry_widgets[col].get() for col in columns]
+                    self.add_data(tree, table_name, columns, values)
+                add_button=tk.Button(frame, text="Agregar", command=handle_add)
+                add_button.grid(row=len(columns), column=0, pady=10)
+
+            elif action=="modificar":
+                def load_selected():
+                    selected_item = tree.selection()
+                    if not selected_item:
+                        messagebox.showerror("Error", "Selecciona un registro para modificar.")
+                        return
+                    values=tree.item(selected_item)["values"]
+                    for i, col in enumerate(columns):
+                        entry_widgets[col].delete(0, tk.END)
+                        entry_widgets[col].insert(0, values[i])
+
+                def handle_update():
+                    selected_item=tree.selection()
+                    if not selected_item:
+                        messagebox.showerror("Error", "Selecciona un registro para modificar.")
+                        return
+                    record_id=tree.item(selected_item)["values"][0]
+                    values=[entry_widgets[col].get() for col in columns[1:]]  # Excluir el ID
+                    self.update_data(tree, table_name, columns[1:], values, record_id)
+
+                load_button=tk.Button(frame, text="Cargar", command=load_selected)
+                load_button.grid(row=len(columns), column=0, pady=10)
+
+                update_button=tk.Button(frame, text="Modificar", command=handle_update)
+                update_button.grid(row=len(columns), column=1, pady=10)
 
     def create_table_menu(self, action):
         for widget in self.root.winfo_children():
