@@ -1,5 +1,13 @@
-from my_sql import *
-from sql_server import *
+from conexion import Conexiones
+from pruebas import Pruebas
+
+conexion_db=Conexiones()
+conexion_db.conectar_mysql()
+conexion_db.conectar_sqlserver()
+
+mycursor=conexion_db.mydb.cursor()
+cursor_server=conexion_db.serverdb.cursor()
+
 #NOMBRE TABLAS
 try:
     cursor_server.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' and TABLE_NAME !='sysdiagrams';")
@@ -34,10 +42,10 @@ try:
                 elif str == (columna[1]):
                     tipo="VARCHAR(255)"
                 else:
-                    tipo="DATETIME"
+                    tipo="DATE"
                 
                 if i==1:
-                    tipo +=" PRIMARY KEY"
+                    tipo +=" AUTO_INCREMENT PRIMARY KEY"
                 
                 tipo_datos.append(f"{columna[0]} {tipo}")
                 i +=1
@@ -54,21 +62,18 @@ try:
             for row in info:
                 placeholders = ", ".join(["%s"] * len(row))
                 insert_query = f"INSERT INTO {tabla_nombre} ({', '.join(columnas)}) VALUES ({placeholders})"
-                mycursor.execute(insert_query, tuple(row))  #
+                mycursor.execute(insert_query, tuple(row))
         except:
-            print("Insert info error")
+            print("Repeated information")
 
-        mydb.commit()
+        conexion_db.mydb.commit()
 except:
     print("Migration Error")
-
-
-#PRUEBA PARA JOINS: SELECT p.estado,p.fecha_prestamo FROM Bibliotecario b inner JOIN Prestamo p ON b.bibliotecario_id = p.bibliotecario_id
-mycursor.execute("Select * from autor")
-rows=mycursor.fetchall()
-print(rows)
-
-
+#Ejecutando pruebas
+pruebas=Pruebas(mycursor,cursor_server)
+pruebas.ejecutar_pruebas()
+#Cerrando conexiones y cursores
+conexion_db.cerrar_conexiones()
 
 
 
