@@ -7,7 +7,7 @@ config = {
     "connection_params": {
         "host": "localhost",
         "user": "root",
-        "password": "ElsMymc189",
+        "password": "#CONTRASEÑA",
         "database": "BibliotecaUniversidad"
     }
 }
