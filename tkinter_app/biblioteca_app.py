@@ -1,34 +1,7 @@
-#RECORDAR HACERLO MODULAR EL CODIGO (CREAR MULTIPLES ARCHIVOS PY PARA FUNCIONES O CLASES MAS IMPORTANTES)
 import tkinter as tk
-from tkinter import ttk, messagebox 
-import mysql.connector
-import pyodbc
-from dataclasses import dataclass
+from tkinter import ttk, messagebox
+from acciones import fetch_data, add_data, delete_data, update_data
 
-@dataclass
-class DatabaseConnection:
-    db_type:str
-    connection_params:dict
-
-    def connect(self):
-        try:
-            if self.db_type=="mysql":
-                conn=mysql.connector.connect(**self.connection_params)
-            elif self.db_type=="sqlserver":
-                conn=pyodbc.connect(
-                    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-                    f"SERVER={self.connection_params['host']};"
-                    f"DATABASE={self.connection_params['database']};"
-                    f"UID={self.connection_params['user']};"
-                    f"PWD={self.connection_params['password']};"
-                )
-            else:
-                raise ValueError("Tipo de base de datos no soportado.")
-            return conn
-        except Exception as e:
-            messagebox.showerror("Error", f"Error conectando a la base de datos: {e}")
-            return None
-        
 class BibliotecaApp:
     def __init__(self, root, db_connection):
         self.root=root
@@ -36,82 +9,6 @@ class BibliotecaApp:
         self.root.geometry("800x600")
         self.db_connection=db_connection
         self.create_main_menu()
-    
-    def fetch_data(self, tree, table_name):
-        conn=self.db_connection.connect()
-        if not conn:
-            return 
-        
-        cursor=conn.cursor()
-        try:
-            cursor.execute(f"SELECT * FROM {table_name}")
-            rows=cursor.fetchall()
-            tree.delete(*tree.get_children())
-            for row in rows:
-                tree.insert("", "end", values=row)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo recuperar datos de {table_name}: {e}")
-        finally:
-            conn.close()
-
-    def add_data(self, tree, table_name, columns, values):
-        conn=self.db_connection.connect()
-        if not conn: 
-            return
-        
-        cursor=conn.cursor()
-        try:
-            placeholders=", ".join(["%s"]*len(values))
-            cursor.execute(f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})", values)
-            conn.commit()
-            messagebox.showinfo("Exito", f"Registro agregado a {table_name}.")
-            self.fetch_data(tree, table_name)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo agregar el registro a {table_name}:{e}")
-        finally:
-            conn.close()
-
-    def delete_data(self, tree, table_name, id_column):
-        selected_item=tree.selection()
-        if not selected_item:
-            messagebox.showerror("Error", "Selecciona un registro para eliminar.")
-            return
-
-        conn=self.db_connection.connect()
-        if not conn:
-            return
-
-        cursor=conn.cursor()
-        try:
-            record_id=tree.item(selected_item)["values"][0]
-            cursor.execute(f"DELETE FROM {table_name} WHERE {id_column} = %s", (record_id,))
-            conn.commit()
-            messagebox.showinfo("Éxito", f"Registro eliminado de {table_name}.")
-            self.fetch_data(tree, table_name)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo eliminar el registro de {table_name}: {e}")
-        finally:
-            conn.close()
- 
-    def update_data(self, tree, table_name, columns, values, record_id):
-        conn=self.db_connection.connect()
-        if not conn:
-            return
-        
-        cursor=conn.cursor()
-        try:
-            set_clause=", ".join([f"{col}=%s" for col in columns])
-            cursor.execute(
-                f"UPDATE {table_name} SET {set_clause} WHERE {columns[0]}=%s",
-                values+[record_id]
-            )
-            conn.commit()
-            messagebox.showinfo("Éxito", f"Registro actualizado en {table_name}.")
-            self.fetch_data(tree, table_name)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo actualizar el registro de {table_name}: {e}")
-        finally:
-            conn.close()
 
     def create_action_interface(self, action, table_name, columns, id_column):
         for widget in self.root.winfo_children():
@@ -221,19 +118,3 @@ class BibliotecaApp:
                 width=20,
                 command=lambda a=action: self.create_table_menu(a)
             ).pack(pady=5)
-
-config={
-    "db_type":"mysql",  #Cambiar de acuerdo a la bd
-    "connection_params": {
-        "host": "localhost",
-        "user": "root",
-        "password": "#CONTRASEÑA",
-        "database": "BibliotecaUniversidad",
-        "auth_plugin":'mysql_native_password'
-    }
-}
-
-root=tk.Tk()
-db_connection=DatabaseConnection(config["db_type"], config["connection_params"])
-app=BibliotecaApp(root, db_connection)
-root.mainloop()
