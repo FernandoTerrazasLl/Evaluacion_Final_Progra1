@@ -2,30 +2,43 @@
 import tkinter as tk
 from tkinter import ttk, messagebox 
 import mysql.connector
+import pyodbc
+from dataclasses import dataclass
 
+@dataclass
+class DatabaseConnection:
+    db_type:str
+    connection_params:dict
+
+    def connect(self):
+        try:
+            if self.db_type=="mysql":
+                conn=mysql.connector.connect(**self.connection_params)
+            elif self.db_type=="sqlserver":
+                conn=pyodbc.connect(
+                    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+                    f"SERVER={self.connection_params['host']};"
+                    f"DATABASE={self.connection_params['database']};"
+                    f"UID={self.connection_params['user']};"
+                    f"PWD={self.connection_params['password']};"
+                )
+            else:
+                raise ValueError("Tipo de base de datos no soportado.")
+            return conn
+        except Exception as e:
+            messagebox.showerror("Error", f"Error conectando a la base de datos: {e}")
+            return None
+        
 class BibliotecaApp:
-    def __init__(self, root):
+    def __init__(self, root, db_connection):
         self.root=root
         self.root.title("Gestión de Biblioteca Universitaria")
         self.root.geometry("800x600")
+        self.db_connection=db_connection
         self.create_main_menu()
-        
-    def connect_database(self):
-        try:
-            conn=mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password= "#CONTRASEÑA",
-                auth_plugin='mysql_native_password',
-                database="BibliotecaUniversidad"
-            )
-            return conn
-        except mysql.connector.Error as err:
-            messagebox.showerror("Error", f"Error conectando a MySQL: {err}")
-            return None
     
     def fetch_data(self, tree, table_name):
-        conn=self.connect_database()
+        conn=self.db_connection.connect()
         if not conn:
             return 
         
@@ -42,7 +55,7 @@ class BibliotecaApp:
             conn.close()
 
     def add_data(self, tree, table_name, columns, values):
-        conn=self.connect_database()
+        conn=self.db_connection.connect()
         if not conn: 
             return
         
@@ -64,7 +77,7 @@ class BibliotecaApp:
             messagebox.showerror("Error", "Selecciona un registro para eliminar.")
             return
 
-        conn=self.connect_database()
+        conn=self.db_connection.connect()
         if not conn:
             return
 
@@ -81,7 +94,7 @@ class BibliotecaApp:
             conn.close()
  
     def update_data(self, tree, table_name, columns, values, record_id):
-        conn=self.connect_database()
+        conn=self.db_connection.connect()
         if not conn:
             return
         
@@ -142,30 +155,28 @@ class BibliotecaApp:
                 add_button=tk.Button(frame, text="Agregar", command=handle_add)
                 add_button.grid(row=len(columns), column=0, pady=10)
 
-            elif action=="modificar":
-                def load_selected():
+            elif action == "modificar":
+                def load_selected(event):
+                    selected_item = tree.selection()
+                    if not selected_item:
+                        return
+                    values = tree.item(selected_item)["values"]  
+                    for i, col in enumerate(columns):
+                        entry_widgets[col].delete(0, tk.END)  
+                        entry_widgets[col].insert(0, values[i])
+
+                def handle_update():
                     selected_item = tree.selection()
                     if not selected_item:
                         messagebox.showerror("Error", "Selecciona un registro para modificar.")
                         return
-                    values=tree.item(selected_item)["values"]
-                    for i, col in enumerate(columns):
-                        entry_widgets[col].delete(0, tk.END)
-                        entry_widgets[col].insert(0, values[i])
-
-                def handle_update():
-                    selected_item=tree.selection()
-                    if not selected_item:
-                        messagebox.showerror("Error", "Selecciona un registro para modificar.")
-                        return
-                    record_id=tree.item(selected_item)["values"][0]
-                    values=[entry_widgets[col].get() for col in columns[1:]]  # Excluir el ID
+                    record_id = tree.item(selected_item)["values"][0]  
+                    values = [entry_widgets[col].get() for col in columns[1:]] 
                     self.update_data(tree, table_name, columns[1:], values, record_id)
 
-                load_button=tk.Button(frame, text="Cargar", command=load_selected)
-                load_button.grid(row=len(columns), column=0, pady=10)
+                tree.bind("<ButtonRelease-1>", load_selected)
 
-                update_button=tk.Button(frame, text="Modificar", command=handle_update)
+                update_button = tk.Button(frame, text="Modificar", command=handle_update)
                 update_button.grid(row=len(columns), column=1, pady=10)
 
     def create_table_menu(self, action):
@@ -211,7 +222,18 @@ class BibliotecaApp:
                 command=lambda a=action: self.create_table_menu(a)
             ).pack(pady=5)
 
-if __name__=="__main__":
-    root=tk.Tk()
-    app=BibliotecaApp(root)
-    root.mainloop()
+config={
+    "db_type":"mysql",  #Cambiar de acuerdo a la bd
+    "connection_params": {
+        "host": "localhost",
+        "user": "root",
+        "password": "#CONTRASEÑA",
+        "database": "BibliotecaUniversidad",
+        "auth_plugin":'mysql_native_password'
+    }
+}
+
+root=tk.Tk()
+db_connection=DatabaseConnection(config["db_type"], config["connection_params"])
+app=BibliotecaApp(root, db_connection)
+root.mainloop()
