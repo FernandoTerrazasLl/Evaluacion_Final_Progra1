@@ -53,7 +53,7 @@ class Pruebas:
             columnas = []
             for columna in cursor.description:
                 columnas.append(columna[0])
-                cursor.fetchall() #IMPORTANTE PARA LIMPIAR EL CURSOR
+                cursor.fetchall() #IMPORTANTE PARA LIMPIAR EL CURSOR (error memorable)
 
             if "fecha_modificacion" in columnas:
                 columnas.remove("fecha_modificacion")
@@ -87,7 +87,6 @@ class Pruebas:
         try:
             tablas_mysql = self.obtener_tablas(self.mycursor)
             tablas_sqlserver = self.obtener_tablas(self.cursor_server)
-            print(tablas_mysql)
             if sorted(tablas_mysql)==sorted(tablas_sqlserver):
                 for tabla in tablas_mysql:
                     self.comprobar_registros(tabla)
