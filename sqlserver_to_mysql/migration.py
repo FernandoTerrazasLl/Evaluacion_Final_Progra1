@@ -22,6 +22,7 @@ try:
             tabla_nombre=tabla[0]
             cursor_server.execute(f"SELECT * FROM {tabla_nombre};")
             info=cursor_server.fetchall()
+            
         except:
             print("Table name not found")
         
@@ -29,7 +30,9 @@ try:
             #SAQUE COLUMNAS NOMBRES
             columnas = []  
             for columna in cursor_server.description:
-                columnas.append(columna[0]) 
+                columnas.append(columna[0])
+
+            columnas.append("fecha_modificacion")
         except:
             print("Column names extraction error")
         
@@ -49,6 +52,8 @@ try:
                 
                 tipo_datos.append(f"{columna[0]} {tipo}")
                 i +=1
+
+            tipo_datos.append("fecha_modificacion DATE")
         except:
             print("Data type error")
 
@@ -58,23 +63,27 @@ try:
         except:
             print("Create table error")
         # Insertar los datos en MySQL
+        
         try:
             for row in info:
-                placeholders = ", ".join(["%s"] * len(row))
+                placeholders = ", ".join(["%s"] * (len(row)+1))
                 insert_query = f"INSERT INTO {tabla_nombre} ({', '.join(columnas)}) VALUES ({placeholders})"
-                mycursor.execute(insert_query, tuple(row))
+                mycursor.execute(insert_query, tuple(row)+(None,))
         except:
             print("Repeated information")
 
         conexion_db.mydb.commit()
+
 except:
     print("Migration Error")
 #Ejecutando pruebas
-pruebas=Pruebas(mycursor,cursor_server)
-pruebas.ejecutar_pruebas()
-#Cerrando conexiones y cursores
-conexion_db.cerrar_conexiones()
+try:
+    pruebas=Pruebas(mycursor,cursor_server)
+    pruebas.ejecutar_pruebas()
 
+except:
+    print("Pruebas Error")
 
-
-
+finally:
+    #Cerrando conexiones
+    conexion_db.cerrar_conexiones()
