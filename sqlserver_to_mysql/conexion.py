@@ -9,12 +9,15 @@ class Conexiones:
     serverdb=None
 
     def crear_base_datos(self):
-        if self.mydb.is_connected():
-                mycursor = self.mydb.cursor()
-                mycursor.execute("DROP DATABASE IF EXISTS BibliotecaUniversidad;")
-                mycursor.execute("CREATE DATABASE IF NOT EXISTS BibliotecaUniversidad;")
-                mycursor.execute("USE BibliotecaUniversidad;")
-                mycursor.close()
+        try:
+            if self.mydb.is_connected():
+                    mycursor = self.mydb.cursor()
+                    mycursor.execute("DROP DATABASE IF EXISTS BibliotecaUniversidad;")
+                    mycursor.execute("CREATE DATABASE IF NOT EXISTS BibliotecaUniversidad;")
+                    mycursor.execute("USE BibliotecaUniversidad;")
+                    mycursor.close()
+        except:
+            print("Data base creation error")
 
     def conectar_mysql(self):
         try:
@@ -48,9 +51,3 @@ class Conexiones:
     def cerrar_conexiones(self):
         self.mydb.close()
         self.serverdb.close()
-
-
-        
-
-
-

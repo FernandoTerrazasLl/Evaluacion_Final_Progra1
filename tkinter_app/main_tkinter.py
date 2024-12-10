@@ -15,7 +15,7 @@ class BibliotecaApp:
             conn=mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password= "#CONTRASEÑA",
+                password= "Fernando2420",
                 auth_plugin='mysql_native_password',
                 database="BibliotecaUniversidad"
             )
