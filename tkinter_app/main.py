@@ -7,7 +7,7 @@ config = {
     "connection_params": {
         "host": "localhost",
         "user": "root",
-        "password": "#CONTRASEÑA",
+        "password": "Fernando2420",
         "database": "BibliotecaUniversidad",
         "auth_plugin":'mysql_native_password'
     }
