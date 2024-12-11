@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from funciones import fetch_data, add_data, delete_data, update_data
 
 class BibliotecaApp:
     def __init__(self, root, db_connection):
@@ -8,130 +9,46 @@ class BibliotecaApp:
         self.root.geometry("800x600")
         self.db_connection=db_connection
         self.create_main_menu()
-    
-    def fetch_data(self, tree, table_name):
-        conn=self.db_connection.connect()
-        if not conn:
-            return 
-        
-        cursor=conn.cursor()
-        try:
-            cursor.execute(f"SELECT * FROM {table_name}")
-            rows=cursor.fetchall()
-            tree.delete(*tree.get_children())
-            for row in rows:
-                tree.insert("", "end", values=row)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo recuperar datos de {table_name}: {e}")
-        finally:
-            conn.close()
-
-    def add_data(self, tree, table_name, columns, values):
-        conn=self.db_connection.connect()
-        if not conn:
-            return
-
-        values=[value if value.strip() else None for value in values]
-
-        cursor=conn.cursor()
-        try:
-            placeholders = ", ".join(["%s"] * len(values))
-            cursor.execute(f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})", values)
-            conn.commit()
-            messagebox.showinfo("Éxito", f"Registro agregado a {table_name}.")
-            self.fetch_data(tree, table_name)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo agregar el registro a {table_name}: {e}")
-        finally:
-            conn.close()
-
-    def delete_data(self, tree, table_name, id_column):
-        selected_item=tree.selection()
-        if not selected_item:
-            messagebox.showerror("Error", "Selecciona un registro para eliminar.")
-            return
-
-        conn=self.db_connection.connect()
-        if not conn:
-            return
-
-        cursor=conn.cursor()
-        try:
-            record_id= tree.item(selected_item)["values"][0]
-            query=f"DELETE FROM {table_name} WHERE {id_column} = %s"
-            cursor.execute(query, (record_id,))
-            conn.commit()
-            messagebox.showinfo("Éxito", f"Registro eliminado de {table_name}.")
-            self.fetch_data(tree, table_name) 
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo eliminar el registro de {table_name}: {e}")
-        finally:
-            conn.close()
-
-    def update_data(self, tree, table_name, columns, values, record_id):
-        conn=self.db_connection.connect()
-        if not conn:
-            return
-
-        processed_values=[None if value.strip()=="" else value for value in values]
-
-        cursor=conn.cursor()
-        try:
-            set_clause=", ".join([f"{col}=%s" for col in columns])
-            query=f"UPDATE {table_name} SET {set_clause} WHERE {columns[0]}=%s"
-
-            cursor.execute(query, processed_values + [record_id])
-            conn.commit()
-            messagebox.showinfo("Éxito", f"Registro actualizado en {table_name}.")
-            self.fetch_data(tree, table_name)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo actualizar el registro de {table_name}: {e}")
-        finally:
-            conn.close()
 
     def create_action_interface(self, action, table_name, columns, id_column):
         for widget in self.root.winfo_children():
             widget.destroy()
-
         tk.Label(self.root, text=f"{action.capitalize()} en {table_name}", font=("Arial", 16)).pack(pady=10)
-
         tree=ttk.Treeview(self.root, columns=columns, show="headings")
         for col in columns:
             tree.heading(col, text=col)
             tree.column(col, width=150)
         tree.pack(fill="both", expand=True, pady=10)
-
-        self.fetch_data(tree, table_name)
+        fetch_data(self.db_connection, tree, table_name)
 
         if action=="eliminar":
             delete_button=tk.Button(
                 self.root, text="Eliminar",
-                command=lambda: self.delete_data(tree, table_name, id_column)
+                command=lambda: delete_data(self.db_connection, tree, table_name, id_column)
             )
             delete_button.pack(pady=10)
-
+        if action in ["agregar", "modificar"]:
+            self.create_form(action, tree, table_name, columns, id_column)
         back_button=tk.Button(self.root, text="Volver", command=lambda: self.create_table_menu(action))
         back_button.pack(pady=10)
 
-        if action=="agregar" or action=="modificar":
-            frame=tk.Frame(self.root)
-            frame.pack(pady=10)
+    def create_form(self, action, tree, table_name, columns, id_column):
+        frame=tk.Frame(self.root)
+        frame.pack(pady=10)
+        entry_widgets={}
+        for i, col in enumerate(columns):
+            tk.Label(frame, text=col).grid(row=i, column=0, padx=5, pady=2)
+            entry=tk.Entry(frame)
+            entry.grid(row=i, column=1, padx=5, pady=2)
+            entry_widgets[col] = entry
 
-            entry_widgets={}
-            for i, col in enumerate(columns):
-                tk.Label(frame, text=col).grid(row=i, column=0, padx=5, pady=2)
-                entry=tk.Entry(frame)
-                entry.grid(row=i, column=1, padx=5, pady=2)
-                entry_widgets[col]=entry
+        if action=="agregar":
+            def handle_add():
+                values=[entry_widgets[col].get() for col in columns]
+                add_data(self.db_connection, tree, table_name, columns, values)
+            tk.Button(frame, text="Agregar", command=handle_add).grid(row=len(columns), column=0, pady=10)
 
-            if action=="agregar":
-                def handle_add():
-                    values=[entry_widgets[col].get() for col in columns]
-                    self.add_data(tree, table_name, columns, values)
-                add_button=tk.Button(frame, text="Agregar", command=handle_add)
-                add_button.grid(row=len(columns), column=0, pady=10)
-
-            elif action=="modificar":
+        elif action=="modificar":
                 def load_selected(event):
                     selected_item=tree.selection()
                     if not selected_item:
@@ -148,10 +65,8 @@ class BibliotecaApp:
                         return
                     record_id=tree.item(selected_item)["values"][0]
                     values=[entry_widgets[col].get() for col in columns]
-                    self.update_data(tree, table_name, columns, values, record_id)
-
+                    update_data(self.db_connection, tree, table_name, columns, values, record_id)
                 tree.bind("<ButtonRelease-1>", load_selected)
-
                 update_button=tk.Button(frame, text="Modificar", command=handle_update)
                 update_button.grid(row=len(columns), column=1, pady=10)
 
@@ -179,16 +94,13 @@ class BibliotecaApp:
                 width=20,
                 command=lambda t=table_name, c=columns: self.create_action_interface(action, t, c, c[0])
             ).pack(pady=5)
-
         back_button=tk.Button(self.root, text="Volver", command=self.create_main_menu)
         back_button.pack(pady=10)
 
     def create_main_menu(self):
         for widget in self.root.winfo_children():
             widget.destroy()
-
         tk.Label(self.root, text="Sistema de Gestión de Biblioteca Universitaria", font=("Arial", 20)).pack(pady=20)
-
         actions=["visualizar", "agregar", "modificar", "eliminar"]
         for action in actions:
             tk.Button(
