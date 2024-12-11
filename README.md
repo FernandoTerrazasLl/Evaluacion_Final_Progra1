@@ -24,7 +24,63 @@ Diagramas de clases usados durante la migracion de datos:
 
 ![Diagrama_clases_migracion drawio](https://github.com/user-attachments/assets/55d244fc-ec5a-4229-ad28-70507201668c)
 ## PSEUDOCODIGO
+PARA EL ARCHIVO CONEXION:
+```
+CLASE Conexiones:
+    ATRIBUTOS:
+        mydb = NULO
+        serverdb = NULO
 
+    MÉTODO crear_base_datos():
+        TRATAR:
+            SI mydb está conectado:
+                Crear un cursor (mycursor)
+                Ejecutar las siguientes sentencias SQL:
+                    1. Eliminar la base de datos "BibliotecaUniversidad" si existe
+                    2. Crear la base de datos "BibliotecaUniversidad" si no existe
+                    3. Usar la base de datos "BibliotecaUniversidad"
+                Cerrar el cursor
+        GESTIONAR ERROR:
+            Mostrar "Error en la creación de la base de datos"
+
+    MÉTODO conectar_mysql():
+        TRATAR:
+            Conectar a MySQL usando:
+                - host = "localhost"
+                - user = "root"
+                - port = "3306"
+                - password = "#CONTRASEÑA"
+                - auth_plugin = "mysql_native_password"
+            GUARDAR la conexión en mydb
+            LLAMAR a crear_base_datos()
+        GESTIONAR ERROR:
+            Mostrar "Error al conectar con MySQL"
+
+    MÉTODO conectar_sqlserver():
+        Configurar los parámetros de conexión para SQL Server:
+            - server = "#EDITAR"
+            - database = "BibliotecaUniversitaria"
+            - username = "#EDITAR"
+        TRATAR:
+            Conectar a SQL Server usando los parámetros
+            GUARDAR la conexión en serverdb
+        GESTIONAR ERROR:
+            Mostrar "Error al conectar con SQL Server"
+
+    MÉTODO cerrar_conexiones():
+        TRATAR:
+            SI mydb está conectado:
+                Cerrar la conexión a MySQL
+        GESTIONAR ERROR:
+            Mostrar "Error al cerrar la conexión con MySQL"
+
+        TRATAR:
+            SI serverdb está conectado:
+                Cerrar la conexión a SQL Server
+        GESTIONAR ERROR:
+            Mostrar "Error al cerrar la conexión con SQL Server"
+
+```
 ## Características Principales
 
 # Interfaz
