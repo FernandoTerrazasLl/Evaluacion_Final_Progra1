@@ -27,6 +27,7 @@ class Conexiones:
                     port='3306',
                     password='#CONTRASEÑA',
                     auth_plugin='mysql_native_password'
+
             )
             self.crear_base_datos()
         except Error:
