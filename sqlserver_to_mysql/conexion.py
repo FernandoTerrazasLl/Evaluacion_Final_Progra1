@@ -25,7 +25,7 @@ class Conexiones:
                     host="localhost",
                     user="root",
                     port='3306',
-                    password='Fernando2420'
+                    password='Fernando2420'#CAMBIAR A TU CONTRASENA
             )
             self.crear_base_datos()
         except Error:
@@ -36,7 +36,6 @@ class Conexiones:
         server = 'DESKTOP-T8BJL71'  
         database = 'BibliotecaUniversitaria'
         username = 'DESKTOP-T8BJL71\\user'
-
         try:
             self.serverdb = pyodbc.connect(
                 f"DRIVER={{ODBC Driver 17 for SQL Server}};"
