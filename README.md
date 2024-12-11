@@ -14,7 +14,7 @@ La empresa enfrenta un problema crítico de gestión de datos debido a un sistem
 3. Implementar una interfaz de usuario con Python y Tkinter para facilitar la administración de los datos migrados.
 
 ## DIAGRAMA ENTIDAD-RELACION
-
+![Diagrama Entidad-Relacion FINAL](https://github.com/user-attachments/assets/ead833c5-73b8-4b99-b8c0-6e5838880d14)
 ## DIAGRAMA DE CLASES
 
 ## DIAGRAMAS DE FLUJO

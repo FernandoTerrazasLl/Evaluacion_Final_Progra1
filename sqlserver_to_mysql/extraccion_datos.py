@@ -10,7 +10,7 @@ def obtener_tablas(cursor,base_datos):
             resultados = cursor.fetchall()
             for tabla in resultados:
                 tablas.append(tabla[0])
-
+            print(tablas)
             return tablas
         except Exception as e:
             print(f"pruebas error in obtener_tablas, {str(e)}")

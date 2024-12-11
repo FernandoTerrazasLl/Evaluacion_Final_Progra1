@@ -2,7 +2,7 @@ from conexion import Conexiones
 from pruebas import Pruebas
 from extraccion_datos import obtener_tablas,extraer_columnas,extraer_numero_registros,extraer_info,extraer_tipo_datos
 from insertar_datos import insertar_tabla,insertar_info
-
+#ESTABLECIENDO CONEXIONES
 conexion_db=Conexiones()
 conexion_db.conectar_mysql()
 conexion_db.conectar_sqlserver()
