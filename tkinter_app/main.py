@@ -8,13 +8,13 @@ config = {
         "host": "localhost",
         "user": "root",
         "password": "#CONTRASEÑA",
-        "database": "BibliotecaUniversidad"
+        "database": "BibliotecaUniversidad",
+        "auth_plugin":'mysql_native_password'
     }
 }
 
-if __name__ == "__main__":
-    root = Tk()
-    db_connection = DatabaseConnection(config["db_type"], config["connection_params"])
-    app = BibliotecaApp(root, db_connection)
+if __name__=="__main__":
+    root=Tk()
+    db_connection=DatabaseConnection(config["db_type"], config["connection_params"])
+    app=BibliotecaApp(root, db_connection)
     root.mainloop()
-

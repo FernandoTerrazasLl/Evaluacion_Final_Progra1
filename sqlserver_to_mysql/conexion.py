@@ -25,7 +25,8 @@ class Conexiones:
                     host="localhost",
                     user="root",
                     port='3306',
-                    password='Fernando2420'
+                    password='#CONTRASEÑA',
+                    auth_plugin='mysql_native_password'
             )
             self.crear_base_datos()
         except Error:
@@ -33,9 +34,9 @@ class Conexiones:
         
 
     def conectar_sqlserver(self):
-        server = 'DESKTOP-T8BJL71'  
+        server = '#EDITAR'  
         database = 'BibliotecaUniversitaria'
-        username = 'DESKTOP-T8BJL71\\user'
+        username = '#EDITAR'
 
         try:
             self.serverdb = pyodbc.connect(

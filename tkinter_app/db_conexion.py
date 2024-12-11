@@ -15,10 +15,9 @@ class DatabaseConnection:
             elif self.db_type=="sqlserver":
                 conn=pyodbc.connect(
                     f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-                    f"SERVER={self.connection_params['host']};"
+                    f"SERVER={self.connection_params['server']};"
                     f"DATABASE={self.connection_params['database']};"
-                    f"UID={self.connection_params['user']};"
-                    f"PWD={self.connection_params['password']};"
+                    f"Trusted_Connection={self.connection_params.get('trusted_connection', 'yes')};"
                 )
             else:
                 raise ValueError("Tipo de base de datos no soportado.")
@@ -26,3 +25,4 @@ class DatabaseConnection:
         except Exception as e:
             messagebox.showerror("Error", f"Error conectando a la base de datos: {e}")
             return None
+        
