@@ -1,97 +1,51 @@
 import mysql.connector
 import pyodbc
 from dataclasses import dataclass
+from extraccion_datos import obtener_tablas,extraer_columnas,extraer_numero_registros,extraer_info
 
 @dataclass
 class Pruebas:
     mycursor:any
     cursor_server:any
-    
-    def obtener_tablas(self, cursor):
-        tablas = []
+    def lista_tuplas_a_string(self,info):
         try:
-            if cursor == self.mycursor:
-                cursor.execute("SHOW TABLES;")
-            else:
-                cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' and TABLE_NAME !='sysdiagrams';")
-            
-            resultados = cursor.fetchall()
-            for tabla in resultados:
-                tablas.append(tabla[0])
-                
-            return tablas
+            informacion = []
+            for fila in info:
+                informacion.append(str(fila))
+            return informacion
         except Exception as e:
-            print(f"pruebas error in obtener_tablas, {str(e)}")
-
-    def extraer_numero_registros(self,cursor,tabla):
-        try:
-            cursor.execute(f"SELECT COUNT(*) FROM {tabla};")
-            numero_registros=cursor.fetchall()[0][0]
-            print(numero_registros)
-
-            if numero_registros is None:
-                print("None")
-            return numero_registros
-            
-        except Exception as e:
-            print(f"Pruebas error in extraer_numero_registros, {str(e)}")
+            print(f"Error in document Pruebas, with the lista_tuplas_a_string,{str(e)}")
 
     def comprobar_registros(self, tabla):
         try:
-            registros_mysql = self.extraer_numero_registros(self.mycursor,tabla)
-            registros_sqlserver = self.extraer_numero_registros(self.cursor_server,tabla)
+            registros_mysql = extraer_numero_registros(self.mycursor,tabla)
+            registros_sqlserver = extraer_numero_registros(self.cursor_server,tabla)
             assert registros_mysql == registros_sqlserver, f"Error en la tabla {tabla} en cantidad de registros"
+            
         except Exception as e:
             print(f"Pruebas error in comprobar_registros, {str(e)}")
 
-    def extraer_info(self,cursor,tabla):
-        try:
-            if cursor==self.mycursor:
-                cursor.execute(f"SELECT * FROM {tabla} LIMIT 1;")#PARA TRAER SOLO LAS COLUMNAS
-            else:
-                cursor.execute(f"SELECT TOP 1 * FROM {tabla};")
-            columnas = []
-            for columna in cursor.description:
-                columnas.append(columna[0])
-                cursor.fetchall() #IMPORTANTE PARA LIMPIAR EL CURSOR (error memorable)
-
-            if "fecha_modificacion" in columnas:
-                columnas.remove("fecha_modificacion")
-
-            columnas_query = ", ".join(columnas)
-            if cursor==self.mycursor:
-                cursor.execute(f"SELECT {columnas_query} FROM {tabla};")
-            else:
-                cursor.execute(f"SELECT {columnas_query} FROM [{tabla}];")
-            info = cursor.fetchall()
-            resultado = []
-
-            for fila in info:
-                resultado.append(str(fila))
-            return tuple(resultado)
-            
-        except Exception as e:
-            print(f"Pruebas error in extraer_info, {str(e)}")
-            
     def comprobar_contenido(self, tabla):
         try:
             # Extraer la información de ambas bases de datos
-            info_mysql = self.extraer_info(self.mycursor, tabla)
-            info_sqlserver = self.extraer_info(self.cursor_server, tabla)
+            info_mysql = extraer_info(self.mycursor, tabla,"mysql")
+            info_mysql_transformada= self.lista_tuplas_a_string(info_mysql)
+            info_sqlserver = extraer_info(self.cursor_server, tabla,"sqlserver")
+            info_sqlserver_transformada= self.lista_tuplas_a_string(info_sqlserver)
 
-            assert sorted(info_mysql) == sorted(info_sqlserver), f"Diferencia de contenido en tabla {tabla}"
+            assert sorted(info_mysql_transformada) == sorted(info_sqlserver_transformada), f"Diferencia de contenido en tabla {tabla}"
         except Exception as e:
             print(f"Pruebas error in comprobar_contenido, {str(e)}")
 
     def ejecutar_pruebas(self):
         try:
-            tablas_mysql = self.obtener_tablas(self.mycursor)
-            tablas_sqlserver = self.obtener_tablas(self.cursor_server)
+            tablas_mysql = obtener_tablas(self.mycursor,"mysql")
+            tablas_sqlserver = obtener_tablas(self.cursor_server,"sqlserver")
             if sorted(tablas_mysql)==sorted(tablas_sqlserver):
                 for tabla in tablas_mysql:
                     self.comprobar_registros(tabla)
                     self.comprobar_contenido(tabla)
-                    print(f"Tabla '{tabla}' correcta")
+                    print(f"Tabla {tabla} correcta")
             else:
                 print("Number of tables test error")
         except Exception as e:

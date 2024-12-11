@@ -1,5 +1,6 @@
 from tkinter import messagebox
 
+#Visualizar Datos
 def fetch_data(db_connection, tree, table_name):
     conn=db_connection.connect()
     if not conn:
@@ -16,6 +17,7 @@ def fetch_data(db_connection, tree, table_name):
     finally:
         conn.close()
 
+#Añadir datos
 def add_data(db_connection, tree, table_name, columns, values):
     conn=db_connection.connect()
     if not conn:
@@ -34,6 +36,7 @@ def add_data(db_connection, tree, table_name, columns, values):
     finally:
         conn.close()
 
+#Eliminar datos
 def delete_data(db_connection, tree, table_name, id_column):
     selected_item=tree.selection()
     if not selected_item:
@@ -55,6 +58,7 @@ def delete_data(db_connection, tree, table_name, id_column):
     finally:
         conn.close()
 
+#Modificar datos
 def update_data(db_connection, tree, table_name, columns, values, record_id):
     conn=db_connection.connect()
     if not conn:
