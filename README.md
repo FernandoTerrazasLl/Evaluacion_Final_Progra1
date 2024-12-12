@@ -23,7 +23,7 @@ El diagrama entidad-relacion usado para la base de datos antigua (SQLSERVER) es:
 Diagramas de clases usados durante la migracion de datos:
 
 ![Diagrama_clases_migracion drawio](https://github.com/user-attachments/assets/55d244fc-ec5a-4229-ad28-70507201668c)
-## PSEUDOCODIGO
+## PSEUDOCODIGO 
 Para el archivo conexion:
 ```
 CLASE Conexiones:
@@ -310,7 +310,194 @@ Finalmente:
 ## DIAGRAMA DE CLASES
 
 ## PSEUDOCODIGO
+Para el archivo main.py:
+```
+MÓDULO PRINCIPAL:
+    DEFINIR configuración:
+        Tipo de base de datos: MySQL
+        Parámetros de conexión:
+            - Host: localhost
+            - Usuario: root
+            - Contraseña: [contraseña]
+            - Base de datos: BibliotecaUniversidad
+            - Plugin de autenticación: mysql_native_password
 
+    SI este es el script principal:
+        CREAR ventana raíz de Tkinter
+        
+        CREAR objeto de conexión de base de datos:
+            - Usar tipo de base de datos de la configuración
+            - Usar parámetros de conexión de la configuración
+        
+        CREAR aplicación de Biblioteca:
+            - Pasar ventana raíz
+            - Pasar objeto de conexión de base de datos
+        
+        INICIAR bucle principal de la aplicación
+```
+Para el archivo db_conexion.py:
+```
+CLASE Dataclass DatabaseConnection:
+    ATRIBUTOS:
+        db_type: str
+        connection_params: dict
+
+    MÉTODO connect():
+        INTENTAR:
+            SI db_type es "mysql":
+                Crear conexión usando mysql.connector con parámetros de conexión
+            
+            SINO SI db_type es "sqlserver":
+                Crear cadena de conexión con:
+                    - Driver ODBC
+                    - Servidor
+                    - Base de datos 
+                    - Conexión de confianza (por defecto 'sí')
+                
+                Crear conexión usando pyodbc con cadena de conexión
+            
+            SINO:
+                Lanzar error de valor con mensaje "Tipo de base de datos no soportado"
+            
+            RETORNAR conexión
+        
+        CAPTURAR cualquier excepción:
+            Mostrar mensaje de error con detalles de la excepción
+            RETORNAR nulo
+```
+Para el archivo funciones.py:
+```
+FUNCIÓN fetch_data(db_connection, tree, table_name):
+    Establecer conexión a base de datos
+    SI no hay conexión:
+        RETORNAR
+    
+    Crear cursor de base de datos
+    INTENTAR:
+        Ejecutar consulta SELECT * de la tabla
+        Recuperar todas las filas
+        Limpiar árbol
+        Para cada fila:
+            Insertar fila en árbol
+    CAPTURAR cualquier excepción:
+        Mostrar mensaje de error de recuperación de datos
+    FINALMENTE:
+        Cerrar conexión
+
+FUNCIÓN add_data(db_connection, tree, table_name, columns, values):
+    Establecer conexión a base de datos
+    SI no hay conexión:
+        RETORNAR
+    
+    Procesar valores (convertir cadenas vacías a nulo)
+    Crear cursor de base de datos
+    INTENTAR:
+        Crear consulta INSERT con marcadores de posición
+        Ejecutar consulta con valores
+        Confirmar transacción
+        Mostrar mensaje de éxito
+        Recuperar datos actualizados para el árbol
+    CAPTURAR cualquier excepción:
+        Mostrar mensaje de error de inserción
+    FINALMENTE:
+        Cerrar conexión
+
+FUNCIÓN delete_data(db_connection, tree, table_name, id_column):
+    Verificar si hay elemento seleccionado en árbol
+    SI no hay selección:
+        Mostrar error de selección
+        RETORNAR
+    
+    Establecer conexión a base de datos
+    SI no hay conexión:
+        RETORNAR
+    
+    Crear cursor de base de datos
+    INTENTAR:
+        Obtener ID del registro seleccionado
+        Crear consulta DELETE con ID
+        Ejecutar consulta
+        Confirmar transacción
+        Mostrar mensaje de éxito
+        Recuperar datos actualizados para el árbol
+    CAPTURAR cualquier excepción:
+        Mostrar mensaje de error de eliminación
+    FINALMENTE:
+        Cerrar conexión
+
+FUNCIÓN update_data(db_connection, tree, table_name, columns, values, record_id):
+    Establecer conexión a base de datos
+    SI no hay conexión:
+        RETORNAR
+    
+    Procesar valores (convertir cadenas vacías a nulo)
+    Crear cursor de base de datos
+    INTENTAR:
+        Crear cláusula SET para actualización
+        Crear consulta UPDATE con cláusula SET
+        Ejecutar consulta con valores e ID
+        Confirmar transacción
+        Mostrar mensaje de éxito
+        Recuperar datos actualizados para el árbol
+    CAPTURAR cualquier excepción:
+        Mostrar mensaje de error de actualización
+    FINALMENTE:
+        Cerrar conexión
+```
+Para el archivo biblioteca_app.py:
+```
+CLASE BibliotecaApp:
+    CONSTRUCTOR(root, db_connection):
+        Establecer título de la ventana
+        Establecer tamaño de la ventana
+        Guardar conexión de base de datos
+        Llamar a crear menú principal
+
+    FUNCIÓN create_action_interface(self, action, table_name, columns, id_column):
+        Limpiar widgets de la ventana
+        Mostrar título de la acción
+        Crear árbol (Treeview) con columnas
+        Configurar encabezados y columnas del árbol
+        Cargar datos de la tabla en el árbol
+        
+        SI acción es "eliminar":
+            Crear botón de eliminar
+        
+        SI acción es "agregar" o "modificar":
+            Crear formulario de entrada
+        
+        Crear botón de volver al menú anterior
+
+    FUNCIÓN create_form(self, action, tree, table_name, columns, id_column):
+        Crear marco para formulario
+        Crear campos de entrada para cada columna
+        
+        SI acción es "agregar":
+            Crear función para agregar datos
+            Crear botón de agregar
+        
+        SI acción es "modificar":
+            Crear función para cargar datos seleccionados
+            Crear función para actualizar datos
+            Añadir evento de selección
+            Crear botón de modificar
+
+    FUNCIÓN create_table_menu(self, action):
+        Limpiar widgets de la ventana
+        Definir diccionario de tablas con sus columnas
+        
+        Para cada tabla:
+            Crear botón para seleccionar tabla
+        
+        Crear botón de volver al menú principal
+
+    FUNCIÓN create_main_menu():
+        Limpiar widgets de la ventana
+        Mostrar título principal
+        
+        Para cada acción (visualizar, agregar, modificar, eliminar):
+            Crear botón de acción que lleva al menú de tablas
+```
 ### Aplicación GUI con Tkinter
 
 - Visualización de registros.
