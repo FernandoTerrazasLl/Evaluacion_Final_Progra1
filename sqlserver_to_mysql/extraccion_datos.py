@@ -1,4 +1,4 @@
-#Funciones para la extraction de contenido
+#OBTIENES LOS NOMBRES DE LAS TABLAS
 def obtener_tablas(cursor,base_datos):
         tablas = []
         try:
@@ -10,11 +10,10 @@ def obtener_tablas(cursor,base_datos):
             resultados = cursor.fetchall()
             for tabla in resultados:
                 tablas.append(tabla[0])
-            print(tablas)
             return tablas
         except Exception as e:
             print(f"pruebas error in obtener_tablas, {str(e)}")
-
+#EXTRAES LA CANTIDAD DE LINEAS TOTALES DE UNA TABLA
 def extraer_numero_registros(cursor,tabla):
         try:
             cursor.execute(f"SELECT COUNT(*) FROM {tabla};")
@@ -24,7 +23,7 @@ def extraer_numero_registros(cursor,tabla):
             
         except Exception as e:
             print(f"Pruebas error in extraer_numero_registros, {str(e)}")
-
+#EXTRAES LOS NOMBRES DE LAS COLUMNAS DE UNA TABLA
 def extraer_columnas(cursor,tabla,base_datos):
     try:
         if base_datos=="mysql":
@@ -39,7 +38,7 @@ def extraer_columnas(cursor,tabla,base_datos):
 
     except Exception as e:
         print("Error in extraction of columns")
-
+#EXTRAES EL CONTENIDO DE UNA TABLA
 def extraer_info(cursor,tabla,base_datos):
     try:
         columnas=extraer_columnas(cursor,tabla,base_datos)
@@ -52,7 +51,7 @@ def extraer_info(cursor,tabla,base_datos):
             
     except Exception as e:
         print(f"Pruebas error in extraer_info, {str(e)}")
-
+#EXTRAES LOS TIPOS DE DATO DE LAS COLUMNAS DE UNA TABLA CONCATENADO CON EL NOMBRE DE LAS COLUMNAS
 def extraer_tipo_datos(cursor,tabla,base_datos):
     try:
         columnas=extraer_columnas(cursor,tabla,base_datos)
@@ -71,7 +70,7 @@ def extraer_tipo_datos(cursor,tabla,base_datos):
                 
             tipo_datos.append(f"{columna[0]} {tipo}")
             i +=1
-        tipo_datos.append("fecha_modificacion DATE")
+        tipo_datos.append("fecha_modificacion DATETIME")
         return tipo_datos
     except Exception as e:
         print(f"Data type error, {str(e)}")

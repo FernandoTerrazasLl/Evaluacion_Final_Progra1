@@ -3,15 +3,24 @@ from pruebas import Pruebas
 from extraccion_datos import obtener_tablas,extraer_columnas,extraer_numero_registros,extraer_info,extraer_tipo_datos
 from insertar_datos import insertar_tabla,insertar_info
 #ESTABLECIENDO CONEXIONES
-conexion_db=Conexiones()
-conexion_db.conectar_mysql()
-conexion_db.conectar_sqlserver()
+try:
+    conexion_db=Conexiones()
+    conexion_db.conectar_mysql()
+    conexion_db.conectar_sqlserver()
+except Exception as e:
+    print(f"Error in conexion, {str(e)}")
 #CREANDO CURSORES PARA CONSULTAS
-mycursor=conexion_db.mydb.cursor()
-cursor_server=conexion_db.serverdb.cursor()
+try:
+    mycursor=conexion_db.mydb.cursor()
+    cursor_server=conexion_db.serverdb.cursor()
+except Exception as e:
+    print(f"Error in creation of cursor, {str(e)}")
 
 #NOMBRE TABLAS
-tablas_nombres=obtener_tablas(cursor_server,"sqlserver")
+try:
+    tablas_nombres=obtener_tablas(cursor_server,"sqlserver")
+except Exception as e:
+    print(f"Error in extraction of tables names, {str(e)}")
 try:
     for tabla in tablas_nombres:
         #FILAS INFO DE LA TABLA SQLSERVER
@@ -25,7 +34,7 @@ try:
             columnas.append("fecha_modificacion")
         except Exception as e:
             print(f"Column names extraction error, {str(e)}")
-        #EXTRAER TIPO DE DATO CON COLUMNAS JUNTA
+        #EXTRAER TIPO DE DATO CON COLUMNAS concatenadas
         try:
             tipo_datos=extraer_tipo_datos(cursor_server,tabla,"sqlserver")
         except Exception as e:
@@ -57,4 +66,4 @@ finally:
     try:
         conexion_db.cerrar_conexiones()
     except Exception as e:
-        print("Error in closing conexions in migration document")
+        print("Error in closing conections in migration document")

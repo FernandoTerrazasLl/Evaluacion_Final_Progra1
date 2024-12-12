@@ -7,6 +7,7 @@ from extraccion_datos import obtener_tablas,extraer_columnas,extraer_numero_regi
 class Pruebas:
     mycursor:any
     cursor_server:any
+    #TRANSFORMA UNA LISTA DE TUPLAS A UNA LISTA DE STRING PARA LA COMPARACION DEL ASSERT
     def lista_tuplas_a_string(self,info):
         try:
             informacion = []
@@ -15,7 +16,7 @@ class Pruebas:
             return informacion
         except Exception as e:
             print(f"Error in document Pruebas, with the lista_tuplas_a_string,{str(e)}")
-
+    #COMPRUEBA QUE LA CANTIDAD DE LINEAS EN SQLSERVER SEA LA MISMA QUE EN MYSQL
     def comprobar_registros(self, tabla):
         try:
             registros_mysql = extraer_numero_registros(self.mycursor,tabla)
@@ -24,7 +25,7 @@ class Pruebas:
             
         except Exception as e:
             print(f"Pruebas error in comprobar_registros, {str(e)}")
-
+    #COMPRUEBA QUE LA INFORMACION DE UNA TABLA SEA IGUAL ENTRE SQLSERVER Y MYSQL
     def comprobar_contenido(self, tabla):
         try:
             # Extraer la información de ambas bases de datos
@@ -36,7 +37,7 @@ class Pruebas:
             assert sorted(info_mysql_transformada) == sorted(info_sqlserver_transformada), f"Diferencia de contenido en tabla {tabla}"
         except Exception as e:
             print(f"Pruebas error in comprobar_contenido, {str(e)}")
-
+    #EJECUTA TODAS LAS PRUEBAS, COMPROBANDO CADA TABLA
     def ejecutar_pruebas(self):
         try:
             tablas_mysql = obtener_tablas(self.mycursor,"mysql")

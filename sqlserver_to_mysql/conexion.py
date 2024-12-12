@@ -7,7 +7,7 @@ from dataclasses import dataclass
 class Conexiones:
     mydb=None
     serverdb=None
-
+    #Crea base de datos en MYSQL
     def crear_base_datos(self):
         try:
             if self.mydb.is_connected():
@@ -18,26 +18,25 @@ class Conexiones:
                     mycursor.close()
         except:
             print("Data base creation error")
-
+    #ESTABLE CONEXION CON MYSQL
     def conectar_mysql(self):
         try:
             self.mydb = mysql.connector.connect(
                     host="localhost",
                     user="root",
                     port='3306',
-                    password='#CONTRASEÑA',
+                    password='Fernando2420', #Fernando2420
                     auth_plugin='mysql_native_password'
 
             )
             self.crear_base_datos()
         except Error:
             print(f"Connection error in mysql")
-        
-
+    #ESTABLECE CONEXION CON SQLSERVER
     def conectar_sqlserver(self):
-        server = '#EDITAR'  
+        server = 'DESKTOP-T8BJL71'  #Fernando: DESKTOP-T8BJL71
         database = 'BibliotecaUniversitaria'
-        username = '#EDITAR'
+        username = 'DESKTOP-T8BJL71/user'  #Fernando: DESKTOP-T8BJL71\user
 
         try:
             self.serverdb = pyodbc.connect(
@@ -49,7 +48,10 @@ class Conexiones:
             )
         except:
             print('Connection error in sqlserver')
-    
+    #CIERRA LAS AMBAS CONEXIONES SI AMBAS ESTAN ABIERTAS
     def cerrar_conexiones(self):
-        self.mydb.close()
-        self.serverdb.close()
+        if self.mydb and self.serverdb:
+            self.mydb.close()
+            self.serverdb.close()
+        else:
+            print("Error in docoument conexion in cerrar_conexiones, no conection")
