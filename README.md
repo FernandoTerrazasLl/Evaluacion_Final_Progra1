@@ -22,7 +22,7 @@ El diagrama entidad-relacion usado para la base de datos antigua (SQLSERVER) es:
 ## DIAGRAMA DE CLASES
 Diagramas de clases usados durante la migracion de datos:
 
-![Diagrama_clases_migracion drawio](https://github.com/user-attachments/assets/55d244fc-ec5a-4229-ad28-70507201668c)
+![Diagrama_clases_migracion drawio (1)](https://github.com/user-attachments/assets/7830c0ef-0d11-46ed-8b21-6d67a86cf08b)
 ## PSEUDOCODIGO 
 Para el archivo conexion:
 ```
