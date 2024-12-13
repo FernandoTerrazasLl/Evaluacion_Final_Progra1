@@ -21,26 +21,125 @@ class BibliotecaApp:
         tree.pack(fill="both", expand=True, pady=10)
         fetch_data(self.db_connection, tree, table_name)
 
-        if action=="eliminar":
-            delete_button=tk.Button(
-                self.root, text="Eliminar",
-                command=lambda: delete_data(self.db_connection, tree, table_name, id_column)
-            )
-            delete_button.pack(pady=10)
-        if action in ["agregar", "modificar"]:
-            self.create_form(action, tree, table_name, columns, id_column)
+        form_columns=columns[1:]
+
+        if table_name=="Prestamo":
+            if action in ["agregar", "modificar"]:
+                self.create_prestamo_form(action, tree, table_name, form_columns)
+            elif action=="eliminar":
+                delete_button=tk.Button(
+                    self.root, text="Eliminar",
+                    command=lambda: delete_data(self.db_connection, tree, table_name, id_column)
+                )
+                delete_button.pack(pady=10)
+        else:
+            if action=="eliminar":
+                delete_button=tk.Button(
+                    self.root, text="Eliminar",
+                    command=lambda: delete_data(self.db_connection, tree, table_name, id_column)
+                )
+                delete_button.pack(pady=10)
+            if action in ["agregar", "modificar"]:
+                self.create_form(action, tree, table_name, form_columns, id_column)
+
         back_button=tk.Button(self.root, text="Volver", command=lambda: self.create_table_menu(action))
         back_button.pack(pady=10)
+
+    def create_prestamo_form(self, action, tree, table_name, columns):
+        frame=tk.Frame(self.root)
+        frame.pack(pady=10)
+
+        entry_widgets={}
+        for i, col in enumerate(columns):
+            if col=="estado":
+                tk.Label(frame, text=col).grid(row=i, column=0, padx=5, pady=2)
+                estado_var=tk.StringVar()
+                estado_frame=tk.Frame(frame)
+                estado_frame.grid(row=i, column=1, padx=5, pady=2)
+
+                def update_estado_fields(*args):
+                    estado=estado_var.get()
+                    if estado=="Activo":
+                        entry_widgets["fecha_devolucion"].delete(0, tk.END)
+                        entry_widgets["fecha_devolucion"].config(state="disabled")
+                    else:
+                        entry_widgets["fecha_devolucion"].config(state="normal")
+
+                tk.Radiobutton(estado_frame, text="Activo", variable=estado_var, value="Activo", command=update_estado_fields).pack(side="left")
+                tk.Radiobutton(estado_frame, text="Devuelto", variable=estado_var, value="Devuelto", command=update_estado_fields).pack(side="left")
+                estado_var.trace_add("write", update_estado_fields)
+                entry_widgets[col]=estado_var
+            else:
+                tk.Label(frame, text=col).grid(row=i, column=0, padx=5, pady=2)
+                entry=tk.Entry(frame)
+                entry.grid(row=i, column=1, padx=5, pady=2)
+                entry_widgets[col] = entry
+
+                # Mensaje formato fecha
+                if "fecha" in col.lower():
+                    tk.Label(frame, text="AAAA-MM-DD", fg="gray").grid(row=i, column=2, padx=5, pady=2)
+
+        def handle_add():
+            values=[]
+            for col in columns:
+                if col=="estado":
+                    values.append(entry_widgets[col].get())
+                else:
+                    values.append(entry_widgets[col].get())
+            if values[3]=="Activo" and values[2].strip():
+                messagebox.showerror("Error", "No puedes establecer una fecha de devolución para un préstamo activo.")
+                return
+            add_data(self.db_connection, tree, table_name, columns, values)
+
+        def handle_update():
+            selected_item=tree.selection()
+            if not selected_item:
+                messagebox.showerror("Error", "Selecciona un registro para modificar.")
+                return
+            record_id=tree.item(selected_item)["values"][0]
+            values=[]
+            for col in columns:
+                if col=="estado":
+                    values.append(entry_widgets[col].get())
+                else:
+                    values.append(entry_widgets[col].get())
+            if values[3]=="Activo" and values[2].strip():
+                messagebox.showerror("Error", "No puedes establecer una fecha de devolución para un préstamo activo.")
+                return
+            update_data(self.db_connection, tree, table_name, columns, values, record_id)
+
+        if action=="agregar":
+            tk.Button(frame, text="Agregar", command=handle_add).grid(row=len(columns), column=0, pady=10)
+        elif action=="modificar":
+            def load_selected(event):
+                selected_item=tree.selection()
+                if not selected_item:
+                    return
+                values=tree.item(selected_item)["values"]
+                for i, col in enumerate(columns):
+                    if col=="estado":
+                        entry_widgets[col].set(values[i+1])
+                    else:
+                        entry_widgets[col].delete(0, tk.END)
+                        entry_widgets[col].insert(0, values[i+1])
+
+            tree.bind("<ButtonRelease-1>", load_selected)
+            tk.Button(frame, text="Modificar", command=handle_update).grid(row=len(columns), column=0, pady=10)
 
     def create_form(self, action, tree, table_name, columns, id_column):
         frame=tk.Frame(self.root)
         frame.pack(pady=10)
+
         entry_widgets={}
         for i, col in enumerate(columns):
             tk.Label(frame, text=col).grid(row=i, column=0, padx=5, pady=2)
             entry=tk.Entry(frame)
             entry.grid(row=i, column=1, padx=5, pady=2)
-            entry_widgets[col] = entry
+            entry_widgets[col]=entry
+
+            # Mensaje formato fecha
+            if "fecha" in col.lower():
+                tk.Label(frame, text="AAAA-MM-DD", fg="gray").grid(row=i, column=2, padx=5, pady=2)
 
         if action=="agregar":
             def handle_add():
@@ -49,26 +148,25 @@ class BibliotecaApp:
             tk.Button(frame, text="Agregar", command=handle_add).grid(row=len(columns), column=0, pady=10)
 
         elif action=="modificar":
-                def load_selected(event):
-                    selected_item=tree.selection()
-                    if not selected_item:
-                        return
-                    values=tree.item(selected_item)["values"]  
-                    for i, col in enumerate(columns):
-                        entry_widgets[col].delete(0, tk.END)  
-                        entry_widgets[col].insert(0, values[i])
+            def load_selected(event):
+                selected_item=tree.selection()
+                if not selected_item:
+                    return
+                values=tree.item(selected_item)["values"]
+                for i, col in enumerate(columns):
+                    entry_widgets[col].delete(0, tk.END)
+                    entry_widgets[col].insert(0, values[i+1])
 
-                def handle_update():
-                    selected_item=tree.selection()
-                    if not selected_item:
-                        messagebox.showerror("Error", "Selecciona un registro para modificar.")
-                        return
-                    record_id=tree.item(selected_item)["values"][0]
-                    values=[entry_widgets[col].get() for col in columns]
-                    update_data(self.db_connection, tree, table_name, columns, values, record_id)
-                tree.bind("<ButtonRelease-1>", load_selected)
-                update_button=tk.Button(frame, text="Modificar", command=handle_update)
-                update_button.grid(row=len(columns), column=1, pady=10)
+            def handle_update():
+                selected_item=tree.selection()
+                if not selected_item:
+                    messagebox.showerror("Error", "Selecciona un registro para modificar.")
+                    return
+                record_id=tree.item(selected_item)["values"][0]
+                values=[entry_widgets[col].get() for col in columns]
+                update_data(self.db_connection, tree, table_name, columns, values, record_id)
+            tree.bind("<ButtonRelease-1>", load_selected)
+            tk.Button(frame, text="Modificar", command=handle_update).grid(row=len(columns), column=0, pady=10)
 
     def create_table_menu(self, action):
         for widget in self.root.winfo_children():
