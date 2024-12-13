@@ -56,6 +56,15 @@ def add_data(db_connection, tree, table_name, columns, values):
     values=[value if value.strip() else None for value in values]
     cursor=conn.cursor()
     try:
+        # Verificar si la tabla tiene columna fecha_modificacion
+        cursor.execute(f"SHOW COLUMNS FROM {table_name} LIKE 'fecha_modificacion'")
+        fecha_mod_exists=cursor.fetchone() is not None
+
+        if fecha_mod_exists:
+            # Agregar fecha_modificacion automáticamente
+            columns.append('fecha_modificacion')
+            values.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
         placeholders=", ".join(["%s"] * len(values))
         query=f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})"
         cursor.execute(query, values)
@@ -131,6 +140,14 @@ def update_data(db_connection, tree, table_name, columns, values, record_id):
     processed_values=[None if value.strip()=="" else value for value in values]
     cursor=conn.cursor()
     try:
+        # Ver si la tabla tiene columna fecha_modificacion
+        cursor.execute(f"SHOW COLUMNS FROM {table_name} LIKE 'fecha_modificacion'")
+        fecha_mod_exists=cursor.fetchone() is not None
+
+        if fecha_mod_exists:
+            # Agregar fecha_modificacion automáticamente
+            columns.append('fecha_modificacion')
+            values.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         set_clause=", ".join([f"{col} = %s" for col in columns])
         query=f"UPDATE {table_name} SET {set_clause} WHERE {columns[0]} = %s"
         cursor.execute(query, processed_values + [record_id])

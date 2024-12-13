@@ -48,9 +48,10 @@ class BibliotecaApp:
     def create_prestamo_form(self, action, tree, table_name, columns):
         frame=tk.Frame(self.root)
         frame.pack(pady=10)
+        form_columns=[col for col in columns if col!='fecha_modificacion']
 
         entry_widgets={}
-        for i, col in enumerate(columns):
+        for i, col in enumerate(form_columns):
             if col=="estado":
                 tk.Label(frame, text=col).grid(row=i, column=0, padx=5, pady=2)
                 estado_var=tk.StringVar()
@@ -81,7 +82,7 @@ class BibliotecaApp:
 
         def handle_add():
             values=[]
-            for col in columns:
+            for col in form_columns:
                 if col=="estado":
                     values.append(entry_widgets[col].get())
                 else:
@@ -89,7 +90,7 @@ class BibliotecaApp:
             if values[3]=="Activo" and values[2].strip():
                 messagebox.showerror("Error", "No puedes establecer una fecha de devolución para un préstamo activo.")
                 return
-            add_data(self.db_connection, tree, table_name, columns, values)
+            add_data(self.db_connection, tree, table_name, form_columns, values)
 
         def handle_update():
             selected_item=tree.selection()
@@ -98,7 +99,7 @@ class BibliotecaApp:
                 return
             record_id=tree.item(selected_item)["values"][0]
             values=[]
-            for col in columns:
+            for col in form_columns:
                 if col=="estado":
                     values.append(entry_widgets[col].get())
                 else:
@@ -106,17 +107,17 @@ class BibliotecaApp:
             if values[3]=="Activo" and values[2].strip():
                 messagebox.showerror("Error", "No puedes establecer una fecha de devolución para un préstamo activo.")
                 return
-            update_data(self.db_connection, tree, table_name, columns, values, record_id)
+            update_data(self.db_connection, tree, table_name, form_columns, values, record_id)
 
         if action=="agregar":
-            tk.Button(frame, text="Agregar", command=handle_add).grid(row=len(columns), column=0, pady=10)
+            tk.Button(frame, text="Agregar", command=handle_add).grid(row=len(form_columns), column=0, pady=10)
         elif action=="modificar":
             def load_selected(event):
                 selected_item=tree.selection()
                 if not selected_item:
                     return
                 values=tree.item(selected_item)["values"]
-                for i, col in enumerate(columns):
+                for i, col in enumerate(form_columns):
                     if col=="estado":
                         entry_widgets[col].set(values[i+1])
                     else:
@@ -124,14 +125,15 @@ class BibliotecaApp:
                         entry_widgets[col].insert(0, values[i+1])
 
             tree.bind("<ButtonRelease-1>", load_selected)
-            tk.Button(frame, text="Modificar", command=handle_update).grid(row=len(columns), column=0, pady=10)
+            tk.Button(frame, text="Modificar", command=handle_update).grid(row=len(form_columns), column=0, pady=10)
 
     def create_form(self, action, tree, table_name, columns, id_column):
+        form_columns=[col for col in columns if col!='fecha_modificacion']
         frame=tk.Frame(self.root)
         frame.pack(pady=10)
 
         entry_widgets={}
-        for i, col in enumerate(columns):
+        for i, col in enumerate(form_columns):
             tk.Label(frame, text=col).grid(row=i, column=0, padx=5, pady=2)
             entry=tk.Entry(frame)
             entry.grid(row=i, column=1, padx=5, pady=2)
@@ -143,9 +145,9 @@ class BibliotecaApp:
 
         if action=="agregar":
             def handle_add():
-                values=[entry_widgets[col].get() for col in columns]
-                add_data(self.db_connection, tree, table_name, columns, values)
-            tk.Button(frame, text="Agregar", command=handle_add).grid(row=len(columns), column=0, pady=10)
+                values=[entry_widgets[col].get() for col in form_columns]
+                add_data(self.db_connection, tree, table_name, form_columns, values)
+            tk.Button(frame, text="Agregar", command=handle_add).grid(row=len(form_columns), column=0, pady=10)
 
         elif action=="modificar":
             def load_selected(event):
@@ -153,7 +155,7 @@ class BibliotecaApp:
                 if not selected_item:
                     return
                 values=tree.item(selected_item)["values"]
-                for i, col in enumerate(columns):
+                for i, col in enumerate(form_columns):
                     entry_widgets[col].delete(0, tk.END)
                     entry_widgets[col].insert(0, values[i+1])
 
@@ -163,11 +165,10 @@ class BibliotecaApp:
                     messagebox.showerror("Error", "Selecciona un registro para modificar.")
                     return
                 record_id=tree.item(selected_item)["values"][0]
-                values=[entry_widgets[col].get() for col in columns]
-                update_data(self.db_connection, tree, table_name, columns, values, record_id)
+                values=[entry_widgets[col].get() for col in form_columns]
+                update_data(self.db_connection, tree, table_name, form_columns, values, record_id)
             tree.bind("<ButtonRelease-1>", load_selected)
-            tk.Button(frame, text="Modificar", command=handle_update).grid(row=len(columns), column=0, pady=10)
-
+            tk.Button(frame, text="Modificar", command=handle_update).grid(row=len(form_columns), column=0, pady=10)
     def create_table_menu(self, action):
         for widget in self.root.winfo_children():
             widget.destroy()
