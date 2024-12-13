@@ -1,6 +1,7 @@
 from tkinter import messagebox
+from datetime import datetime
 
-#Visualizar Datos
+# Visualizar Datos
 def fetch_data(db_connection, tree, table_name):
     conn=db_connection.connect()
     if not conn:
@@ -17,11 +18,41 @@ def fetch_data(db_connection, tree, table_name):
     finally:
         conn.close()
 
-#Añadir datos
+# Añadir datos
 def add_data(db_connection, tree, table_name, columns, values):
     conn=db_connection.connect()
     if not conn:
         return
+    
+    # Validación para la tabla Prestamo
+    if table_name=="Prestamo":
+        fecha_prestamo_index = columns.index("fecha_prestamo")
+        fecha_devolucion_index = columns.index("fecha_devolucion")
+        estado_index = columns.index("estado")
+        
+        fecha_prestamo=values[fecha_prestamo_index]
+        fecha_devolucion = values[fecha_devolucion_index]
+        estado = values[estado_index]
+        
+        # Si el estado es Activo, no debe haber fecha de devolución
+        if estado=="Activo" and fecha_devolucion and fecha_devolucion.strip():
+            messagebox.showerror("Error", "Un préstamo Activo no puede tener fecha de devolución.")
+            return
+        
+        # Si hay fecha de devolución, validar que sea posterior a la fecha de préstamo
+        if fecha_devolucion and fecha_devolucion.strip() and estado == "Devuelto":
+            try:
+                prestamo_date=datetime.strptime(fecha_prestamo, "%Y-%m-%d")
+                devolucion_date=datetime.strptime(fecha_devolucion, "%Y-%m-%d")
+                
+                # Validar que la fecha de devolución sea posterior a la fecha de préstamo
+                if devolucion_date<prestamo_date:
+                    messagebox.showerror("Error", "La fecha de devolución debe ser posterior a la fecha de préstamo.")
+                    return
+            except ValueError:
+                messagebox.showerror("Error", "Formato de fecha inválido. Use AAAA-MM-DD")
+                return
+    
     values=[value if value.strip() else None for value in values]
     cursor=conn.cursor()
     try:
@@ -36,11 +67,15 @@ def add_data(db_connection, tree, table_name, columns, values):
     finally:
         conn.close()
 
-#Eliminar datos
+# Eliminar datos
 def delete_data(db_connection, tree, table_name, id_column):
     selected_item=tree.selection()
     if not selected_item:
         messagebox.showerror("Error", "Selecciona un registro para eliminar.")
+        return
+    # Mensaje de Confirmación eliminar registro
+    confirm=messagebox.askquestion("Confirmación", "¿Estás seguro que deseas eliminar el registro?", icon='warning')
+    if confirm != 'yes':
         return
     conn=db_connection.connect()
     if not conn:
@@ -58,11 +93,41 @@ def delete_data(db_connection, tree, table_name, id_column):
     finally:
         conn.close()
 
-#Modificar datos
+# Modificar datos
 def update_data(db_connection, tree, table_name, columns, values, record_id):
     conn=db_connection.connect()
     if not conn:
         return
+    
+    # Validación para la tabla Prestamo
+    if table_name=="Prestamo":
+        fecha_prestamo_index=columns.index("fecha_prestamo")
+        fecha_devolucion_index=columns.index("fecha_devolucion")
+        estado_index=columns.index("estado")
+        
+        fecha_prestamo=values[fecha_prestamo_index]
+        fecha_devolucion=values[fecha_devolucion_index]
+        estado=values[estado_index]
+        
+        # Si el estado es Activo, no debe haber fecha de devolución
+        if estado=="Activo" and fecha_devolucion and fecha_devolucion.strip():
+            messagebox.showerror("Error", "Un préstamo Activo no puede tener fecha de devolución.")
+            return
+        
+        if fecha_devolucion and fecha_devolucion.strip() and estado=="Devuelto":
+            try:
+                # Convertir fechas para comparación
+                prestamo_date=datetime.strptime(fecha_prestamo, "%Y-%m-%d")
+                devolucion_date=datetime.strptime(fecha_devolucion, "%Y-%m-%d")
+                
+                # Validar que la fecha de devolución sea posterior a la fecha de préstamo
+                if devolucion_date<prestamo_date:
+                    messagebox.showerror("Error", "La fecha de devolución debe ser posterior a la fecha de préstamo.")
+                    return
+            except ValueError:
+                messagebox.showerror("Error", "Formato de fecha inválido. Use AAAA-MM-DD")
+                return
+    
     processed_values=[None if value.strip()=="" else value for value in values]
     cursor=conn.cursor()
     try:
