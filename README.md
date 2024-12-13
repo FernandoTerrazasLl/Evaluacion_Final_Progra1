@@ -7,17 +7,39 @@ La empresa enfrenta un problema crítico de gestión de datos debido a un sistem
 ## **Objetivos del Proyecto**
 
 1. Migrar datos de un sistema obsoleto (SQLSERVER) a una nueva base de datos (MYSQL).
-2. Diseñar una aplicación en Python para gestionar los datos con:
-   - Procedimientos almacenados.
-   - Integridad de la información.
-   - Conexión eficiente y segura con las bases de datos.
+2. Diseñar una aplicación en Python para gestionar los datos
 3. Implementar una interfaz de usuario con Python y Tkinter para facilitar la administración de los datos migrados.
 
 ## DIAGRAMA ENTIDAD-RELACION
 El diagrama entidad-relacion usado para la base de datos antigua (SQLSERVER) es:
 
 ![Diagrama Entidad-Relacion FINAL (1)](https://github.com/user-attachments/assets/5312bb24-af3b-403b-b1d7-c363bb45953e)
+La base de datos nueva tendra la misma estructura, solamente se le adiccioanra un atributo extra a cada tabla respecto a la fecha de modificacion mas reciente de dichos registros.
 # Migracion de Base de Datos
+
+## Requisitos para la Migración
+
+1. **Script para la Migración:**
+   - Utilizar Python y bibliotecas compatibles para la conexión con bases de datos.
+   - Crear un script que migre los datos de una base de datos en SQLSERVER a un nuevo manejador, como MYSQL.
+   - Modificar el esquema original si es necesario mediante sentencias SQL.
+
+2. **Criterios de Finalización:**
+   - Todas las tablas deben aparecer en el nuevo manejador de base de datos tras ejecutar el script.
+   - Todas las relaciones entre registros deben mantenerse intactas.
+   - El script debe emplear `dataclass` para la definición de estructuras de datos.
+   - La ejecución repetida del script no debe generar registros duplicados en la base de datos de destino.
+   - El código debe incluir manejo de errores para operaciones de lectura y escritura.
+   - conexiones solo una vez al inicio del programa.
+   - Manejarse con bloques `try`, `except`, y `finally` para asegurar su cierre adecuado.
+
+## Requisitos de las Pruebas
+   - Asegurarse de que el código de migración de datos funcione correctamente entre SQLSERVER y MYSQL.
+   - Comparar el número de registros en cada tabla de SQLSERVER y MYSQL para garantizar que coincidan.
+   - Comprobar que los valores de los campos en cada registro sean iguales en ambas bases de datos.
+   - Escribir pruebas que validen el contenido y la estructura de las tablas migradas.
+   - Usar `assert` para comparar los datos esperados con los datos reales.
+   - Diseñar casos de prueba para garantizar que las relaciones entre los registros también se mantengan.
 
 ## DIAGRAMA DE CLASES
 Diagramas de clases usados durante la migracion de datos:
@@ -498,8 +520,8 @@ CLASE BibliotecaApp:
         Para cada acción (visualizar, agregar, modificar, eliminar):
             Crear botón de acción que lleva al menú de tablas
 ```
-### Aplicación GUI con Tkinter
-
+### Casos de Uso del Proyecto
+- Migracion entre Base de Datos efectiva incluyendo registros
 - Visualización de registros.
 - Inserción, modificación y eliminación de datos.
 - Validación de entradas del usuario.
@@ -510,10 +532,6 @@ CLASE BibliotecaApp:
 - Verificación de integridad de datos entre tablas de SQLSERVER y MYSQL.
 - Comparación de contenido de registros y conteo de filas totales.
 - Uso de `assert` para asegurar consistencia de datos.
-
-## Casos de Uso
-
-###
 
 ## VIDEO EXPLICATIVO PARA USO DE LA INTERFAZ
 

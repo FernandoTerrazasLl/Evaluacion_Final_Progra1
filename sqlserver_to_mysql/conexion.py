@@ -18,25 +18,25 @@ class Conexiones:
                     mycursor.close()
         except:
             print("Data base creation error")
-    #ESTABLE CONEXION CON MYSQL
+    #ESTABLECE CONEXION CON MYSQL
     def conectar_mysql(self):
         try:
             self.mydb = mysql.connector.connect(
-                    host="localhost",
-                    user="root",
-                    port='3306',
-                    password='Fernando2420', #Fernando2420
-                    auth_plugin='mysql_native_password'
+                host="localhost",
+                user="root",
+                port='3306',
+                password='Fernando2420', #Fernando2420
+                auth_plugin='mysql_native_password'
 
             )
             self.crear_base_datos()
         except Error:
             print(f"Connection error in mysql")
-    #ESTABLECE CONEXION CON SQLSERVER
+    #ESTABLECE CONEXION CON SQLSERVER #Fernando server: DESKTOP-T8BJL71 #Fernando username: DESKTOP-T8BJL71\user
     def conectar_sqlserver(self):
-        server = 'DESKTOP-T8BJL71'  #Fernando: DESKTOP-T8BJL71
+        server = 'DESKTOP-T8BJL71'  
         database = 'BibliotecaUniversitaria'
-        username = 'DESKTOP-T8BJL71/user'  #Fernando: DESKTOP-T8BJL71\user
+        username = 'DESKTOP-T8BJL71/user'  
 
         try:
             self.serverdb = pyodbc.connect(

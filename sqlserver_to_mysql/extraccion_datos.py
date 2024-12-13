@@ -55,7 +55,6 @@ def extraer_info(cursor,tabla,base_datos):
 def extraer_tipo_datos(cursor,tabla,base_datos):
     try:
         columnas=extraer_columnas(cursor,tabla,base_datos)
-        columnas.append("fecha_modificacion")
         tipo_datos=[]
         i=1
         for columna in cursor.description:
