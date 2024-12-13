@@ -14,6 +14,7 @@ La empresa enfrenta un problema crítico de gestión de datos debido a un sistem
 El diagrama entidad-relacion usado para la base de datos antigua (SQLSERVER) es:
 
 ![Diagrama Entidad-Relacion FINAL (1)](https://github.com/user-attachments/assets/5312bb24-af3b-403b-b1d7-c363bb45953e)
+
 La base de datos nueva tendra la misma estructura, solamente se le adiccioanra un atributo extra a cada tabla respecto a la fecha de modificacion mas reciente de dichos registros.
 # Migracion de Base de Datos
 
