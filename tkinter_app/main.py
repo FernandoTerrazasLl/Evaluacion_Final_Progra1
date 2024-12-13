@@ -12,7 +12,7 @@ config = {
     "connection_params": {
         "host": "localhost",
         "user": "root",
-        "password": "Fernando2420",#Fernando: Fernando2420
+        "password": "ElsMymc189",#Fernando: Fernando2420
         "database": "BibliotecaUniversidad",
         "auth_plugin":'mysql_native_password'
     }
