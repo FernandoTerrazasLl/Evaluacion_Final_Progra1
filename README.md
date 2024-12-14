@@ -335,7 +335,7 @@ Finalmente:
 # Interfaz
 
 ## DIAGRAMA DE CLASES
-![93ce2461-f2c2-4348-b3ee-3552610c2139](https://github.com/user-attachments/assets/71f9e402-616e-4817-a7b3-9eff575db189) 
+![DiagramasS drawio](https://github.com/user-attachments/assets/f2a71ac6-c4d2-4f19-9e72-e69215294336) 
 ## PSEUDOCODIGO
 Para el archivo main.py:
 ```
