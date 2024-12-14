@@ -335,58 +335,44 @@ Finalmente:
 ## PSEUDOCODIGO
 Para el archivo main.py:
 ```
-MÓDULO PRINCIPAL:
-    DEFINIR configuración:
-        Tipo de base de datos: MySQL
-        Parámetros de conexión:
-            - Host: localhost
-            - Usuario: root
-            - Contraseña: [contraseña]
-            - Base de datos: BibliotecaUniversidad
-            - Plugin de autenticación: mysql_native_password
+INICIO
+    DEFINIR conexion_db COMO Instancia de Conexiones
 
-    SI este es el script principal:
-        CREAR ventana raíz de Tkinter
-        
-        CREAR objeto de conexión de base de datos:
-            - Usar tipo de base de datos de la configuración
-            - Usar parámetros de conexión de la configuración
-        
-        CREAR aplicación de Biblioteca:
-            - Pasar ventana raíz
-            - Pasar objeto de conexión de base de datos
-        
-        INICIAR bucle principal de la aplicación
-```
-Para el archivo db_conexion.py:
-```
-CLASE Dataclass DatabaseConnection:
-    ATRIBUTOS:
-        db_type: str
-        connection_params: dict
+    # Conexión a la base de datos MySQL
+    INTENTA
+        conexion_db.conectar_mysql()
+        SI conexion_db.mydb NO ESTÁ CONECTADA O conexion_db.mydb NO ES VÁLIDA
+            LANZAR EXCEPCIÓN("Conexión a MySQL no establecida.")
+    EXCEPTO Exception COMO e
+        IMPRIMIR "Error al conectar a las bases de datos: " + e.mensaje
+        SALIR(1)
 
-    MÉTODO connect():
-        INTENTAR:
-            SI db_type es "mysql":
-                Crear conexión usando mysql.connector con parámetros de conexión
-            
-            SINO SI db_type es "sqlserver":
-                Crear cadena de conexión con:
-                    - Driver ODBC
-                    - Servidor
-                    - Base de datos 
-                    - Conexión de confianza (por defecto 'sí')
-                
-                Crear conexión usando pyodbc con cadena de conexión
-            
-            SINO:
-                Lanzar error de valor con mensaje "Tipo de base de datos no soportado"
-            
-            RETORNAR conexión
-        
-        CAPTURAR cualquier excepción:
-            Mostrar mensaje de error con detalles de la excepción
-            RETORNAR nulo
+    # Conexión a la base de datos SQL Server
+    INTENTA
+        conexion_db.conectar_sqlserver()
+    EXCEPTO Exception COMO e
+        IMPRIMIR "Error al conectar a las bases de datos: " + e.mensaje
+        SALIR(1)
+
+    # Creación de la base de datos y migración de datos
+    INTENTA
+        conexion_db.crear_base_datos()
+        LLAMAR migration_main(conexion_db)
+    EXCEPTO Exception COMO e
+        IMPRIMIR "Error durante la creación de la base de datos o la migración: " + e.mensaje
+        conexion_db.cerrar_conexiones()
+        SALIR(1)
+
+    # Iniciar la aplicación Tkinter
+    INTENTA
+        DEFINIR root COMO Tk()
+        DEFINIR app COMO BibliotecaApp(root, conexion_db)
+        LLAMAR root.mainloop()
+    EXCEPTO Exception COMO e
+        IMPRIMIR "Error al iniciar la aplicación Tkinter: " + e.mensaje
+    FINALMENTE
+        conexion_db.cerrar_conexiones()
+FIN
 ```
 Para el archivo funciones.py:
 ```
