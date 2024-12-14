@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from datetime import datetime
 from funciones import fetch_data, add_data, delete_data, update_data
 
 class BibliotecaApp:
@@ -82,31 +83,60 @@ class BibliotecaApp:
                     tk.Label(frame, text="AAAA-MM-DD", fg="gray").grid(row=i, column=2, padx=5, pady=2)
 
         def handle_add():
-            values=[]
+            values = []
             for col in form_columns:
-                if col=="estado":
+                if col == "estado":
                     values.append(entry_widgets[col].get())
                 else:
                     values.append(entry_widgets[col].get())
-            if values[3]=="Activo" and values[2].strip():
-                messagebox.showerror("Error", "No puedes establecer una fecha de devolución para un préstamo activo.")
+
+            # Validar fechas
+            try:
+                fecha_prestamo = datetime.strptime(entry_widgets['fecha_prestamo'].get(), "%Y-%m-%d")
+                fecha_devolucion = datetime.strptime(entry_widgets['fecha_devolucion'].get(), "%Y-%m-%d")
+                fecha_limite_devolucion = datetime.strptime(entry_widgets['fecha_limite_devolucion'].get(), "%Y-%m-%d")
+
+                if fecha_prestamo >= fecha_devolucion:
+                    messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha de devolución.")
+                    return
+                if fecha_prestamo >= fecha_limite_devolucion:
+                    messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha límite de devolución.")
+                    return
+            except ValueError:
+                messagebox.showerror("Error", "Formato de fecha inválido. Use AAAA-MM-DD.")
                 return
+
+            # Agregar datos a la tabla
             add_data(self.db_connection, tree, table_name, form_columns, values)
 
         def handle_update():
-            selected_item=tree.selection()
+            selected_item = tree.selection()
             if not selected_item:
                 messagebox.showerror("Error", "Selecciona un registro para modificar.")
                 return
-            record_id=tree.item(selected_item)["values"][0]
-            values=[]
+
+            record_id = tree.item(selected_item)["values"][0]
+            values = []
             for col in form_columns:
-                if col=="estado":
+                if col == "estado":
                     values.append(entry_widgets[col].get())
                 else:
                     values.append(entry_widgets[col].get())
-            if values[3]=="Activo" and values[2].strip():
-                messagebox.showerror("Error", "No puedes establecer una fecha de devolución para un préstamo activo.")
+
+            # Validar fechas
+            try:
+                fecha_prestamo = datetime.strptime(entry_widgets['fecha_prestamo'].get(), "%Y-%m-%d")
+                fecha_devolucion = datetime.strptime(entry_widgets['fecha_devolucion'].get(), "%Y-%m-%d")
+                fecha_limite_devolucion = datetime.strptime(entry_widgets['fecha_limite_devolucion'].get(), "%Y-%m-%d")
+
+                if fecha_prestamo>fecha_devolucion:
+                    messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha de devolución.")
+                    return
+                if fecha_prestamo>fecha_limite_devolucion:
+                    messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha límite de devolución.")
+                    return
+            except ValueError:
+                messagebox.showerror("Error", "Formato de fecha inválido. Use AAAA-MM-DD.")
                 return
             update_data(self.db_connection, tree, table_name, form_columns, values, record_id)
 
@@ -172,20 +202,24 @@ class BibliotecaApp:
             tk.Button(frame, text="Modificar", command=handle_update).grid(row=len(form_columns), column=0, pady=10)
     
     def obtener_tablas_y_columnas(self):
-        conn=self.db_connection.connect()
-        cursor=conn.cursor()  
-        cursor.execute("SHOW TABLES;") 
+        if not self.db_connection.mydb or not self.db_connection.mydb.is_connected():
+            print("Reconectando a MySQL...")
+            self.db_connection.conectar_mysql()
+
+        conn=self.db_connection.mydb
+        cursor=conn.cursor()
+        cursor.execute("SHOW TABLES;")
         tablas=cursor.fetchall()
 
         tablas_columnas={}
         for tabla in tablas:
             tabla_nombre=tabla[0]
-            cursor.execute(f"DESCRIBE {tabla_nombre};")  
-            columnas = [col[0] for col in cursor.fetchall()]
+            cursor.execute(f"DESCRIBE {tabla_nombre};")
+            columnas=[col[0] for col in cursor.fetchall()]
             tablas_columnas[tabla_nombre]=columnas
 
         return tablas_columnas
-    
+
     def create_table_menu(self, action):
         for widget in self.root.winfo_children():
             widget.destroy()

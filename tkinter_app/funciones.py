@@ -3,7 +3,7 @@ from datetime import datetime
 
 # Visualizar Datos
 def fetch_data(db_connection, tree, table_name):
-    conn=db_connection.connect()
+    conn=db_connection.mydb
     if not conn:
         return
     cursor=conn.cursor()
@@ -16,42 +16,34 @@ def fetch_data(db_connection, tree, table_name):
     except Exception as e:
         messagebox.showerror("Error", f"No se pudo recuperar datos de {table_name}: {e}")
     finally:
-        conn.close()
+        pass
 
 # Añadir datos
 def add_data(db_connection, tree, table_name, columns, values):
-    conn=db_connection.connect()
+    conn=db_connection.mydb
     if not conn:
         return
     
     # Validación para la tabla Prestamo
-    if table_name=="Prestamo":
-        fecha_prestamo_index = columns.index("fecha_prestamo")
-        fecha_devolucion_index = columns.index("fecha_devolucion")
-        estado_index = columns.index("estado")
-        
-        fecha_prestamo=values[fecha_prestamo_index]
-        fecha_devolucion = values[fecha_devolucion_index]
-        estado = values[estado_index]
-        
-        # Si el estado es Activo, no debe haber fecha de devolución
-        if estado=="Activo" and fecha_devolucion and fecha_devolucion.strip():
-            messagebox.showerror("Error", "Un préstamo Activo no puede tener fecha de devolución.")
-            return
-        
-        # Si hay fecha de devolución, validar que sea posterior a la fecha de préstamo
-        if fecha_devolucion and fecha_devolucion.strip() and estado == "Devuelto":
-            try:
-                prestamo_date=datetime.strptime(fecha_prestamo, "%Y-%m-%d")
-                devolucion_date=datetime.strptime(fecha_devolucion, "%Y-%m-%d")
-                
-                # Validar que la fecha de devolución sea posterior a la fecha de préstamo
-                if devolucion_date<prestamo_date:
-                    messagebox.showerror("Error", "La fecha de devolución debe ser posterior a la fecha de préstamo.")
-                    return
-            except ValueError:
-                messagebox.showerror("Error", "Formato de fecha inválido. Use AAAA-MM-DD")
+    if table_name=="prestamo":
+        try:
+            fecha_prestamo_index=columns.index("fecha_prestamo")
+            fecha_devolucion_index=columns.index("fecha_devolucion")
+            fecha_limite_devolucion_index=columns.index("fecha_limite_devolucion")
+
+            fecha_prestamo=datetime.strptime(values[fecha_prestamo_index], "%Y-%m-%d")
+            fecha_devolucion=datetime.strptime(values[fecha_devolucion_index], "%Y-%m-%d")
+            fecha_limite_devolucion=datetime.strptime(values[fecha_limite_devolucion_index], "%Y-%m-%d")
+
+            if fecha_prestamo>fecha_devolucion:
+                messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha de devolución.")
                 return
+            if fecha_prestamo>fecha_limite_devolucion:
+                messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha límite de devolución.")
+                return
+        except ValueError:
+            messagebox.showerror("Error", "Formato de fecha inválido. Use AAAA-MM-DD.")
+            return
     
     values=[value if value.strip() else None for value in values]
     cursor=conn.cursor()
@@ -74,7 +66,7 @@ def add_data(db_connection, tree, table_name, columns, values):
     except Exception as e:
         messagebox.showerror("Error", f"No se pudo agregar el registro a {table_name}: {e}")
     finally:
-        conn.close()
+        pass
 
 # Eliminar datos
 def delete_data(db_connection, tree, table_name, id_column):
@@ -86,7 +78,7 @@ def delete_data(db_connection, tree, table_name, id_column):
     confirm=messagebox.askquestion("Confirmación", "¿Estás seguro que deseas eliminar el registro?", icon='warning')
     if confirm != 'yes':
         return
-    conn=db_connection.connect()
+    conn=db_connection.mydb
     if not conn:
         return
     cursor=conn.cursor()
@@ -100,42 +92,34 @@ def delete_data(db_connection, tree, table_name, id_column):
     except Exception as e:
         messagebox.showerror("Error", f"No se pudo eliminar el registro de {table_name}: {e}")
     finally:
-        conn.close()
+        pass
 
 # Modificar datos
 def update_data(db_connection, tree, table_name, columns, values, record_id):
-    conn=db_connection.connect()
+    conn=db_connection.mydb
     if not conn:
         return
     
     # Validación para la tabla Prestamo
-    if table_name=="Prestamo":
-        fecha_prestamo_index=columns.index("fecha_prestamo")
-        fecha_devolucion_index=columns.index("fecha_devolucion")
-        estado_index=columns.index("estado")
-        
-        fecha_prestamo=values[fecha_prestamo_index]
-        fecha_devolucion=values[fecha_devolucion_index]
-        estado=values[estado_index]
-        
-        # Si el estado es Activo, no debe haber fecha de devolución
-        if estado=="Activo" and fecha_devolucion and fecha_devolucion.strip():
-            messagebox.showerror("Error", "Un préstamo Activo no puede tener fecha de devolución.")
-            return
-        
-        if fecha_devolucion and fecha_devolucion.strip() and estado=="Devuelto":
-            try:
-                # Convertir fechas para comparación
-                prestamo_date=datetime.strptime(fecha_prestamo, "%Y-%m-%d")
-                devolucion_date=datetime.strptime(fecha_devolucion, "%Y-%m-%d")
-                
-                # Validar que la fecha de devolución sea posterior a la fecha de préstamo
-                if devolucion_date<prestamo_date:
-                    messagebox.showerror("Error", "La fecha de devolución debe ser posterior a la fecha de préstamo.")
-                    return
-            except ValueError:
-                messagebox.showerror("Error", "Formato de fecha inválido. Use AAAA-MM-DD")
+    if table_name=="prestamo":
+        try:
+            fecha_prestamo_index=columns.index("fecha_prestamo")
+            fecha_devolucion_index=columns.index("fecha_devolucion")
+            fecha_limite_devolucion_index=columns.index("fecha_limite_devolucion")
+
+            fecha_prestamo=datetime.strptime(values[fecha_prestamo_index], "%Y-%m-%d")
+            fecha_devolucion=datetime.strptime(values[fecha_devolucion_index], "%Y-%m-%d")
+            fecha_limite_devolucion=datetime.strptime(values[fecha_limite_devolucion_index], "%Y-%m-%d")
+
+            if fecha_prestamo>fecha_devolucion:
+                messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha de devolución.")
                 return
+            if fecha_prestamo>fecha_limite_devolucion:
+                messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha límite de devolución.")
+                return
+        except ValueError:
+            messagebox.showerror("Error", "Formato de fecha inválido. Use AAAA-MM-DD.")
+            return
     
     processed_values=[None if value.strip()=="" else value for value in values]
     cursor=conn.cursor()
@@ -157,4 +141,4 @@ def update_data(db_connection, tree, table_name, columns, values, record_id):
     except Exception as e:
         messagebox.showerror("Error", f"No se pudo actualizar el registro de {table_name}: {e}")
     finally:
-        conn.close()
+        pass
