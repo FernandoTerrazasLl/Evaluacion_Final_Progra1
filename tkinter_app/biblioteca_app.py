@@ -24,7 +24,7 @@ class BibliotecaApp:
 
         form_columns=columns[1:]
 
-        if table_name=="prestamo":
+        if table_name== "prestamo":
             if action in ["agregar", "modificar"]:
                 self.create_prestamo_form(action, tree, table_name, form_columns)
             elif action == "eliminar":
