@@ -103,7 +103,7 @@ def delete_data(db_connection, tree, table_name, id_column):
 
 # Modificar datos: Actualiza un registro existente en la base de datos.
 def update_data(db_connection, tree, table_name, columns, values, record_id):
-    conn=db_connection.mydb
+    conn = db_connection.mydb
     if not conn:
         return
 
@@ -114,22 +114,34 @@ def update_data(db_connection, tree, table_name, columns, values, record_id):
         # Validación específica para la tabla "prestamo"
         if table_name=="prestamo":
             try:
-                fecha_prestamo_index=columns.index("fecha_prestamo")
-                fecha_devolucion_index=columns.index("fecha_devolucion")
-                fecha_limite_devolucion_index=columns.index("fecha_limite_devolucion")
+                # Validar formato de fecha solo si las columnas están presentes y tienen valores
+                def validar_fecha(col_name):
+                    if col_name in columns:
+                        fecha_str=values[columns.index(col_name)]
+                        return datetime.strptime(fecha_str, "%Y-%m-%d") if fecha_str.strip() else None
+                    return None
 
-                fecha_prestamo=datetime.strptime(values[fecha_prestamo_index], "%Y-%m-%d")
-                fecha_devolucion=datetime.strptime(values[fecha_devolucion_index], "%Y-%m-%d")
-                fecha_limite_devolucion=datetime.strptime(values[fecha_limite_devolucion_index], "%Y-%m-%d")
+                fecha_prestamo=validar_fecha("fecha_prestamo")
+                fecha_devolucion=validar_fecha("fecha_devolucion")
+                fecha_limite_devolucion=validar_fecha("fecha_limite_devolucion")
 
-                if fecha_prestamo>fecha_devolucion:
+                # Validar lógica de fechas solo si las fechas están presentes
+                if fecha_prestamo and fecha_devolucion and fecha_prestamo>fecha_devolucion:
                     messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha de devolución.")
                     return
-                if fecha_prestamo>fecha_limite_devolucion:
+
+                if fecha_prestamo and fecha_limite_devolucion and fecha_prestamo>fecha_limite_devolucion:
                     messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha límite de devolución.")
                     return
-            except ValueError:
-                messagebox.showerror("Error", "Formato de fecha inválido. Use AAAA-MM-DD.")
+
+                # Validar estado: si "Devuelto", la fecha de devolución es obligatoria
+                if "estado" in columns and values[columns.index("estado")]=="Devuelto":
+                    if not fecha_devolucion:
+                        messagebox.showerror("Error", "La fecha de devolución no puede estar vacía si el estado es 'Devuelto'.")
+                        return
+
+            except ValueError as e:
+                messagebox.showerror("Error", f"Formato de fecha inválido. Use AAAA-MM-DD. Detalle: {e}")
                 return
 
         # Excluir las columnas que no se deben modificar
