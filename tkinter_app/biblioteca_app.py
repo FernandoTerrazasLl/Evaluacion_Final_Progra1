@@ -23,15 +23,16 @@ class BibliotecaApp:
 
         form_columns=columns[1:]
 
-        if table_name=="Prestamo":
+        if table_name=="prestamo":
             if action in ["agregar", "modificar"]:
                 self.create_prestamo_form(action, tree, table_name, form_columns)
-            elif action=="eliminar":
-                delete_button=tk.Button(
+            elif action == "eliminar":
+                delete_button = tk.Button(
                     self.root, text="Eliminar",
                     command=lambda: delete_data(self.db_connection, tree, table_name, id_column)
                 )
                 delete_button.pack(pady=10)
+
         else:
             if action=="eliminar":
                 delete_button=tk.Button(
@@ -45,10 +46,10 @@ class BibliotecaApp:
         back_button=tk.Button(self.root, text="Volver", command=lambda: self.create_table_menu(action))
         back_button.pack(pady=10)
 
-    def create_prestamo_form(self, action, tree, table_name, columns):
+    def create_prestamo_form(self, action, tree, table_name, form_columns):
         frame=tk.Frame(self.root)
         frame.pack(pady=10)
-        form_columns=[col for col in columns if col!='fecha_modificacion']
+        form_columns=[col for col in form_columns if col!='fecha_modificacion']
 
         entry_widgets={}
         for i, col in enumerate(form_columns):
@@ -169,30 +170,36 @@ class BibliotecaApp:
                 update_data(self.db_connection, tree, table_name, form_columns, values, record_id)
             tree.bind("<ButtonRelease-1>", load_selected)
             tk.Button(frame, text="Modificar", command=handle_update).grid(row=len(form_columns), column=0, pady=10)
+    
+    def obtener_tablas_y_columnas(self):
+        conn=self.db_connection.connect()
+        cursor=conn.cursor()  
+        cursor.execute("SHOW TABLES;") 
+        tablas=cursor.fetchall()
+
+        tablas_columnas={}
+        for tabla in tablas:
+            tabla_nombre=tabla[0]
+            cursor.execute(f"DESCRIBE {tabla_nombre};")  
+            columnas = [col[0] for col in cursor.fetchall()]
+            tablas_columnas[tabla_nombre]=columnas
+
+        return tablas_columnas
+    
     def create_table_menu(self, action):
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        tables={
-            "Usuario": ["usuario_id", "nombre", "apellido", "correo", "tipo_usuario","carrera", "fecha_registro", "fecha_modificacion"],
-            "Bibliotecario": ["bibliotecario_id", "nombre", "apellido", "fecha_contratacion", "correo", "fecha_despido", "fecha_modificacion"],
-            "Prestamo": ["prestamo_id", "usuario_id", "fecha_prestamo", "fecha_devolucion", "estado", "fecha_limite_devolucion", "bibliotecario_id", "fecha_modificacion"],
-            "Detalle_Prestamo": ["detalle_id", "prestamo_id", "libro_id", "cantidad", "fecha_modificacion"],
-            "Libro": ["libro_id", "titulo", "anio_publicacion", "editorial", "tipo_texto_id", "categoria_id",
-                      "copias_totales", "fecha_modificacion"],
-            "Autor": ["autor_id", "nombre", "apellido", "fecha_modificacion"],
-            "Libro_Autor": ["libro_id", "autor_id", "fecha_modificacion"],
-            "Categoria": ["categoria_id", "nombre_categoria", "fecha_modificacion"],
-            "Tipo_Texto": ["tipo_texto_id", "nombre_tipo", "fecha_modificacion"]
-        }
+        tablas_columnas=self.obtener_tablas_y_columnas()
 
-        for table_name, columns in tables.items():
+        for table_name, columns in tablas_columnas.items():
             tk.Button(
                 self.root,
                 text=table_name,
                 width=20,
                 command=lambda t=table_name, c=columns: self.create_action_interface(action, t, c, c[0])
             ).pack(pady=5)
+
         back_button=tk.Button(self.root, text="Volver", command=self.create_main_menu)
         back_button.pack(pady=10)
 
