@@ -13,6 +13,7 @@ def obtener_tablas(cursor,base_datos):
             return tablas
         except Exception as e:
             print(f"pruebas error in obtener_tablas, {str(e)}")
+            return 
 #EXTRAES LA CANTIDAD DE LINEAS TOTALES DE UNA TABLA
 def extraer_numero_registros(cursor,tabla):
         try:
@@ -20,9 +21,9 @@ def extraer_numero_registros(cursor,tabla):
             numero_registros=cursor.fetchone()[0]
 
             return numero_registros
-            
         except Exception as e:
             print(f"Pruebas error in extraer_numero_registros, {str(e)}")
+            return
 #EXTRAES LOS NOMBRES DE LAS COLUMNAS DE UNA TABLA
 def extraer_columnas(cursor,tabla,base_datos):
     try:
@@ -38,6 +39,7 @@ def extraer_columnas(cursor,tabla,base_datos):
 
     except Exception as e:
         print("Error in extraction of columns")
+        return
 #EXTRAES EL CONTENIDO DE UNA TABLA
 def extraer_info(cursor,tabla,base_datos):
     try:
@@ -51,6 +53,7 @@ def extraer_info(cursor,tabla,base_datos):
             
     except Exception as e:
         print(f"Pruebas error in extraer_info, {str(e)}")
+        return
 #EXTRAES LOS TIPOS DE DATO DE LAS COLUMNAS DE UNA TABLA CONCATENADO CON EL NOMBRE DE LAS COLUMNAS
 def extraer_tipo_datos(cursor,tabla,base_datos):
     try:
@@ -73,3 +76,4 @@ def extraer_tipo_datos(cursor,tabla,base_datos):
         return tipo_datos
     except Exception as e:
         print(f"Data type error, {str(e)}")
+        return

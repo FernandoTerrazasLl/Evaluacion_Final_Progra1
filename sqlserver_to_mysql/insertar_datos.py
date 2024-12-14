@@ -4,6 +4,7 @@ def insertar_tabla(cursor,tabla,tipo_datos):
         cursor.execute(f"CREATE TABLE IF NOT EXISTS {tabla} ({', '.join(tipo_datos)});")
     except Exception as e:
         print(f"Error in document insertar_datos, with creation of table, {str(e)}")
+        return
 #INSERTAS EL CONTENIDO DE SQLSERVER A LA TABLA CREADA DE MYSQL
 def insertar_info(cursor,tabla,columnas,info):
     try:
@@ -15,3 +16,4 @@ def insertar_info(cursor,tabla,columnas,info):
             cursor.execute(insert_query, tuple(row)+(fecha_actual,))
     except Exception as e:
         print(f"Error in document insertar_datos, with insertion of information, {str(e)}")
+        return

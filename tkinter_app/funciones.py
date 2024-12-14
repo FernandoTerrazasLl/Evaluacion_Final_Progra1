@@ -1,5 +1,12 @@
 from tkinter import messagebox
 from datetime import datetime
+from enum import Enum
+
+class Estado(Enum):
+    PRESTAMO = 1
+    INACTIVO = 2
+    PENDIENTE = 3
+
 
 # Visualizar Datos
 def fetch_data(db_connection, tree, table_name):

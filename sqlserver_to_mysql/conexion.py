@@ -18,6 +18,7 @@ class Conexiones:
                     mycursor.close()
         except:
             print("Data base creation error")
+            return
     #ESTABLE CONEXION CON MYSQL
     def conectar_mysql(self):
         try:
@@ -31,7 +32,7 @@ class Conexiones:
             self.crear_base_datos()  # Crear la base de datos
         except mysql.connector.Error as e:
             print(f"Error al conectar a MySQL: {e}")
-            self.mydb = None
+            return
     #ESTABLECE CONEXION CON SQLSERVER
     def conectar_sqlserver(self):
         server = 'DESKTOP-T8BJL71'  #Fernando: DESKTOP-T8BJL71
@@ -48,6 +49,7 @@ class Conexiones:
             )
         except:
             print('Connection error in sqlserver')
+            return
     #CIERRA LAS AMBAS CONEXIONES SI AMBAS ESTAN ABIERTAS
     def cerrar_conexiones(self):
         if self.mydb and self.serverdb:
@@ -55,3 +57,4 @@ class Conexiones:
             self.serverdb.close()
         else:
             print("Error in docoument conexion in cerrar_conexiones, no conection")
+            return
