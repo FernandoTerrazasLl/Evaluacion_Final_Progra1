@@ -376,82 +376,150 @@ FIN
 ```
 Para el archivo funciones.py:
 ```
-FUNCIÓN fetch_data(db_connection, tree, table_name):
-    Establecer conexión a base de datos
-    SI no hay conexión:
-        RETORNAR
-    
-    Crear cursor de base de datos
-    INTENTAR:
-        Ejecutar consulta SELECT * de la tabla
-        Recuperar todas las filas
-        Limpiar árbol
-        Para cada fila:
-            Insertar fila en árbol
-    CAPTURAR cualquier excepción:
-        Mostrar mensaje de error de recuperación de datos
-    FINALMENTE:
-        Cerrar conexión
+# Importar herramientas necesarias para mostrar mensajes y manejar fechas
 
-FUNCIÓN add_data(db_connection, tree, table_name, columns, values):
-    Establecer conexión a base de datos
-    SI no hay conexión:
-        RETORNAR
-    
-    Procesar valores (convertir cadenas vacías a nulo)
-    Crear cursor de base de datos
+FUNCION fetch_data(db_connection, table_name):
+    conn = db_connection.mydb
+    SI conn NO está disponible:
+        TERMINAR
+    cursor = conn.cursor()
     INTENTAR:
-        Crear consulta INSERT con marcadores de posición
-        Ejecutar consulta con valores
-        Confirmar transacción
-        Mostrar mensaje de éxito
-        Recuperar datos actualizados para el árbol
-    CAPTURAR cualquier excepción:
-        Mostrar mensaje de error de inserción
-    FINALMENTE:
-        Cerrar conexión
+        # Ejecutar consulta para obtener todos los registros de la tabla
+        cursor.execute(f"SELECT * FROM {table_name}")
+        rows = cursor.fetchall()
+        
+        # Mostrar los registros obtenidos
+        IMPRIMIR "Datos obtenidos:"
+        PARA CADA row EN rows:
+            IMPRIMIR row
+    EN CASO DE ERROR e:
+        messagebox.showerror("Error", f"No se pudo recuperar datos de {table_name}: {e}")
 
-FUNCIÓN delete_data(db_connection, tree, table_name, id_column):
-    Verificar si hay elemento seleccionado en árbol
-    SI no hay selección:
-        Mostrar error de selección
-        RETORNAR
+FUNCION add_data(db_connection, table_name, columns, values):
+    conn = db_connection.mydb
+    SI conn NO está disponible:
+        TERMINAR
     
-    Establecer conexión a base de datos
-    SI no hay conexión:
-        RETORNAR
-    
-    Crear cursor de base de datos
-    INTENTAR:
-        Obtener ID del registro seleccionado
-        Crear consulta DELETE con ID
-        Ejecutar consulta
-        Confirmar transacción
-        Mostrar mensaje de éxito
-        Recuperar datos actualizados para el árbol
-    CAPTURAR cualquier excepción:
-        Mostrar mensaje de error de eliminación
-    FINALMENTE:
-        Cerrar conexión
+    SI table_name ES "prestamo":
+        INTENTAR:
+            fecha_prestamo_index = columns.index("fecha_prestamo")
+            fecha_devolucion_index = columns.index("fecha_devolucion")
+            fecha_limite_devolucion_index = columns.index("fecha_limite_devolucion")
 
-FUNCIÓN update_data(db_connection, tree, table_name, columns, values, record_id):
-    Establecer conexión a base de datos
-    SI no hay conexión:
-        RETORNAR
+            fecha_prestamo = datetime.strptime(values[fecha_prestamo_index], "%Y-%m-%d")
+            fecha_devolucion = datetime.strptime(values[fecha_devolucion_index], "%Y-%m-%d")
+            fecha_limite_devolucion = datetime.strptime(values[fecha_limite_devolucion_index], "%Y-%m-%d")
+
+            SI fecha_prestamo > fecha_devolucion:
+                messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha de devolución.")
+                TERMINAR
+            SI fecha_prestamo > fecha_limite_devolucion:
+                messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha límite de devolución.")
+                TERMINAR
+        EN CASO DE ERROR:
+            messagebox.showerror("Error", "Formato de fecha inválido. Use AAAA-MM-DD.")
+            TERMINAR
     
-    Procesar valores (convertir cadenas vacías a nulo)
-    Crear cursor de base de datos
+    values = [value SI value.strip() SINO None PARA value EN values]
+    cursor = conn.cursor()
     INTENTAR:
-        Crear cláusula SET para actualización
-        Crear consulta UPDATE con cláusula SET
-        Ejecutar consulta con valores e ID
-        Confirmar transacción
-        Mostrar mensaje de éxito
-        Recuperar datos actualizados para el árbol
-    CAPTURAR cualquier excepción:
-        Mostrar mensaje de error de actualización
-    FINALMENTE:
-        Cerrar conexión
+        cursor.execute(f"SHOW COLUMNS FROM {table_name} LIKE 'fecha_modificacion'")
+        fecha_mod_exists = cursor.fetchone() NO ES None
+
+        SI fecha_mod_exists:
+            columns.append('fecha_modificacion')
+            values.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+        placeholders = ", ".join(["%s"] * len(values))
+        query = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})"
+        cursor.execute(query, values)
+        conn.commit()
+        messagebox.showinfo("Éxito", f"Registro agregado a {table_name}.")
+        fetch_data(db_connection, table_name)
+    EN CASO DE ERROR e:
+        messagebox.showerror("Error", f"No se pudo agregar el registro a {table_name}: {e}")
+
+FUNCION delete_data(db_connection, table_name, id_column):
+    selected_item = SELECCIONAR registro de la lista de datos
+    SI selected_item ES None:
+        messagebox.showerror("Error", "Selecciona un registro para eliminar.")
+        TERMINAR
+
+    confirm = messagebox.askquestion("Confirmación", "¿Estás seguro que deseas eliminar el registro?", icon='warning')
+    SI confirm != 'yes':
+        TERMINAR
+
+    conn = db_connection.mydb
+    SI conn NO está disponible:
+        TERMINAR
+
+    cursor = conn.cursor()
+    INTENTAR:
+        record_id = ID del registro seleccionado
+        query = f"DELETE FROM {table_name} WHERE {id_column} = %s"
+        cursor.execute(query, (record_id,))
+        conn.commit()
+        messagebox.showinfo("Éxito", f"Registro eliminado de {table_name}.")
+        fetch_data(db_connection, table_name)
+    EN CASO DE ERROR e:
+        messagebox.showerror("Error", f"No se pudo eliminar el registro de {table_name}: {e}")
+
+FUNCION update_data(db_connection, table_name, columns, values, record_id):
+    conn = db_connection.mydb
+    SI conn NO está disponible:
+        TERMINAR
+
+    INTENTAR:
+        primary_key = f"{table_name}_id"
+
+        SI table_name ES "prestamo":
+            INTENTAR:
+                FUNCION validar_fecha(col_name):
+                    SI col_name EN columns:
+                        fecha_str = values[columns.index(col_name)]
+                        RETORNAR datetime.strptime(fecha_str, "%Y-%m-%d") SI fecha_str.strip() SINO None
+                    RETORNAR None
+                
+                fecha_prestamo = validar_fecha("fecha_prestamo")
+                fecha_devolucion = validar_fecha("fecha_devolucion")
+                fecha_limite_devolucion = validar_fecha("fecha_limite_devolucion")
+
+                SI fecha_prestamo Y fecha_devolucion Y fecha_prestamo > fecha_devolucion:
+                    messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha de devolución.")
+                    TERMINAR
+                
+                SI fecha_prestamo Y fecha_limite_devolucion Y fecha_prestamo > fecha_limite_devolucion:
+                    messagebox.showerror("Error", "La fecha de préstamo debe ser menor que la fecha límite de devolución.")
+                    TERMINAR
+
+                SI "estado" EN columns Y values[columns.index("estado")] == "Devuelto":
+                    SI NO fecha_devolucion:
+                        messagebox.showerror("Error", "La fecha de devolución no puede estar vacía si el estado es 'Devuelto'.")
+                        TERMINAR
+            EN CASO DE ERROR e:
+                messagebox.showerror("Error", f"Formato de fecha inválido. Use AAAA-MM-DD. Detalle: {e}")
+                TERMINAR
+
+        excluded_columns = [primary_key, 'fecha_modificacion']
+        modifiable_columns = [col PARA col EN columns SI col NO EN excluded_columns]
+        processed_values = [values[columns.index(col)] PARA col EN modifiable_columns]
+
+        cursor = conn.cursor()
+        cursor.execute(f"SHOW COLUMNS FROM {table_name} LIKE 'fecha_modificacion'")
+        fecha_mod_exists = cursor.fetchone() NO ES None
+
+        SI fecha_mod_exists:
+            modifiable_columns.append('fecha_modificacion')
+            processed_values.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+        set_clause = ", ".join([f"{col} = %s" PARA col EN modifiable_columns])
+        query = f"UPDATE {table_name} SET {set_clause} WHERE {primary_key} = %s"
+        cursor.execute(query, processed_values + [record_id])
+        conn.commit()
+        messagebox.showinfo("Éxito", f"Registro actualizado en {table_name}.")
+        fetch_data(db_connection, table_name)
+    EN CASO DE ERROR e:
+        messagebox.showerror("Error", f"No se pudo actualizar el registro de {table_name}: {e}")
 ```
 Para el archivo biblioteca_app.py:
 ```
