@@ -457,55 +457,64 @@ Para el archivo biblioteca_app.py:
 ```
 CLASE BibliotecaApp:
     CONSTRUCTOR(root, db_connection):
-        Establecer título de la ventana
-        Establecer tamaño de la ventana
-        Guardar conexión de base de datos
-        Llamar a crear menú principal
+        Inicializar la ventana principal (root)
+        Establecer título y tamaño de la ventana
+        Conectar con la base de datos (db_connection)
+        Crear el menú principal (crear_main_menu)
 
-    FUNCIÓN create_action_interface(self, action, table_name, columns, id_column):
-        Limpiar widgets de la ventana
-        Mostrar título de la acción
-        Crear árbol (Treeview) con columnas
-        Configurar encabezados y columnas del árbol
-        Cargar datos de la tabla en el árbol
-        
-        SI acción es "eliminar":
-            Crear botón de eliminar
-        
-        SI acción es "agregar" o "modificar":
-            Crear formulario de entrada
-        
-        Crear botón de volver al menú anterior
-
-    FUNCIÓN create_form(self, action, tree, table_name, columns, id_column):
-        Crear marco para formulario
-        Crear campos de entrada para cada columna
-        
-        SI acción es "agregar":
-            Crear función para agregar datos
-            Crear botón de agregar
-        
-        SI acción es "modificar":
-            Crear función para cargar datos seleccionados
-            Crear función para actualizar datos
-            Añadir evento de selección
-            Crear botón de modificar
-
-    FUNCIÓN create_table_menu(self, action):
-        Limpiar widgets de la ventana
-        Definir diccionario de tablas con sus columnas
-        
-        Para cada tabla:
-            Crear botón para seleccionar tabla
-        
-        Crear botón de volver al menú principal
-
-    FUNCIÓN create_main_menu():
-        Limpiar widgets de la ventana
-        Mostrar título principal
-        
-        Para cada acción (visualizar, agregar, modificar, eliminar):
-            Crear botón de acción que lleva al menú de tablas
+    Método create_action_interface(action, table_name, columns, id_column)
+     Eliminar widgets actuales en la ventana (root)
+     Mostrar título con el nombre de la acción y la tabla (table_name)
+     Crear una tabla (tree) para mostrar los datos con las columnas (columns)
+     Llenar la tabla (tree) con los datos obtenidos desde la base de datos (fetch_data)
+     Excluir la primera columna (ID)
+     Si la tabla es "prestamo":
+       Si la acción es agregar o modificar, crear formulario específico para préstamos (create_prestamo_form)
+       Si la acción es eliminar, crear un botón de eliminar (delete_button)
+     Para otras tablas:
+       Si la acción es eliminar, crear un botón de eliminar (delete_button)
+       Si la acción es agregar o modificar, crear formulario genérico (create_form)
+     Crear botón de volver (back_button)
+   
+   Método create_prestamo_form(action, tree, table_name, form_columns)
+     Crear un marco de formulario (frame)
+     Excluir columna "fecha_modificacion" de las columnas del formulario
+     Para cada columna en form_columns:
+       Si la columna es "estado", crear opciones de radio para "Activo" y "Devuelto"
+       Si la columna es una fecha, mostrar un mensaje con el formato esperado (AAAA-MM-DD)
+       Para otras columnas, crear campos de entrada (entry)
+     Para el campo "estado", configurar comportamiento especial de actualización de campos de fecha
+     Crear botones de agregar o modificar según la acción
+       Si la acción es agregar, validar fechas y agregar datos con (add_data)
+       Si la acción es modificar, validar fechas y actualizar datos con (update_data)
+   
+   Método create_form(action, tree, table_name, columns, id_column)
+     Crear formulario para agregar o modificar datos
+     Excluir columna "fecha_modificacion" de las columnas del formulario
+     Para cada columna en form_columns:
+       Crear un campo de entrada (entry) para cada columna
+       Si la columna es una fecha, mostrar mensaje con formato esperado (AAAA-MM-DD)
+     Crear botones de agregar o modificar según la acción
+       Si la acción es agregar, agregar datos a la tabla con (add_data)
+       Si la acción es modificar, actualizar datos en la tabla con (update_data)
+   
+   Método obtener_tablas_y_columnas
+     Verificar conexión con la base de datos
+     Si no está conectado, reconectar
+     Obtener todas las tablas de la base de datos
+     Para cada tabla, obtener sus columnas
+     Devolver un diccionario con las tablas y sus respectivas columnas
+   
+   Método create_table_menu(action)
+     Eliminar widgets actuales en la ventana (root)
+     Obtener tablas y columnas con (obtener_tablas_y_columnas)
+     Crear un botón por cada tabla que al hacer clic llama a create_action_interface
+     Crear botón de volver (back_button)
+   
+   Método create_main_menu
+     Eliminar widgets actuales en la ventana (root)
+     Mostrar el título del sistema de gestión de la biblioteca
+     Crear botones para cada acción ("visualizar", "agregar", "modificar", "eliminar")
 ```
 ### Casos de Uso del Proyecto
 - Migracion entre Base de Datos efectiva incluyendo registros
