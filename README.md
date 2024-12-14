@@ -1,5 +1,9 @@
 # Proyecto: Modernización del Sistema de Gestión de Datos
 
+## VIDEO EXPLICATIVO PARA USO DE LA INTERFAZ
+
+https://drive.google.com/file/d/12_PcxAjfm2kdZvQG32Ip40sbGtkxcUsG/view?usp=sharing
+
 ## **Definición del Problema**
 
 La empresa enfrenta un problema crítico de gestión de datos debido a un sistema heredado basado en tecnología obsoleta. Este sistema es lento, propenso a inconsistencias y carece de escalabilidad. La tarea consiste en diseñar e implementar un nuevo sistema utilizando bases de datos relacionales y una aplicación Python moderna que garantice eficiencia, confiabilidad y facilidad de uso.
@@ -519,8 +523,6 @@ CLASE BibliotecaApp:
 - Verificación de integridad de datos entre tablas de SQLSERVER y MYSQL.
 - Comparación de contenido de registros y conteo de filas totales.
 - Uso de `assert` para asegurar consistencia de datos.
-
-## VIDEO EXPLICATIVO PARA USO DE LA INTERFAZ
 
 ## Autores
 - Fernando Terrazas
