@@ -12,6 +12,7 @@ if __name__=="__main__":
     try:
         conexion_db=Conexiones()
         conexion_db.conectar_mysql()
+        # Verificar si la conexión a MySQL se estableció correctamente
         if not conexion_db.mydb or not conexion_db.mydb.is_connected():
             raise Exception("Conexión a MySQL no establecida.")
         conexion_db.conectar_sqlserver() 
@@ -20,8 +21,8 @@ if __name__=="__main__":
         exit(1)
 
     try:
-        conexion_db.crear_base_datos()  
-
+        conexion_db.crear_base_datos()  # Crear la base de datos si no existe
+        # Migración de SQL Server a MySQL
         migration_main(conexion_db)
     except Exception as e:
         print(f"Error durante la creación de la base de datos o la migración: {str(e)}")
@@ -31,8 +32,8 @@ if __name__=="__main__":
     try:
         root=Tk()
         app=BibliotecaApp(root, conexion_db)
-        root.mainloop()
+        root.mainloop() # Bucle Principal aplicación Tkinter
     except Exception as e:
         print(f"Error al iniciar la aplicación Tkinter: {str(e)}")
     finally:
-        conexion_db.cerrar_conexiones()
+        conexion_db.cerrar_conexiones() # Cerrando conexiones
