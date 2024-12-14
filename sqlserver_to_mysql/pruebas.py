@@ -64,6 +64,11 @@ class Pruebas:
             GROUP BY u.usuario_id, u.nombre
             ORDER BY total_libros_prestados DESC;
             """
+            """
+            Resultado:
+            ["(1, 'Fernando', 5)", "(2, 'Carlos', 5)", "(3, 'Laura', 5)", "(4, 'José', 5)", "(5, 'María', 5)", "(6, 'Alfredo', 5)", "(7, 'Sofía', 5)", "(8, 'Andrés', 5)", 
+            "(9, 'Paula', 5)", "(10, 'Luis', 5)"]
+            """
             self.comprobar_querys(query1)
             #Prestamos realizados por biblitecarios
             query2="""
@@ -72,6 +77,10 @@ class Pruebas:
             JOIN prestamo p ON b.bibliotecario_id = p.bibliotecario_id
             GROUP BY b.bibliotecario_id, b.nombre
             ORDER BY total_prestamos DESC;
+            """
+            """
+            Resultado:
+            ["(2, 'María', 16)", "(3, 'Carlos', 15)", "(1, 'Juan', 13)", "(4, 'Ana', 6)"]
             """
             self.comprobar_querys(query2)
             #LIBRO POR CATEGORIA Y AUTOR
@@ -83,6 +92,26 @@ class Pruebas:
             JOIN autor a ON la.autor_id = a.autor_id
             GROUP BY c.nombre_categoria, a.nombre
             ORDER BY total_libros DESC;
+            """
+            """
+            Resultado:
+            ["('Arte', 'Albert', 1)", "('Cultura', 'Alice', 1)", "('Clasica', 'Carlos', 1)", 
+            "('Tecnología', 'Charles', 1)", "('Geografía', 'Chuck', 1)",', 1)", "('Psicología', 'David', 1)", 
+            "('Tecnología', 'Doris', 1)", "('Política', 'Edgar', 1)", "('Ficción', 'Eduardo', 1)", 
+            "('Antropología'('Clasica', 'F. Scott', 1)", "('Clasica', 'Fernando', 1)", "('Ficción', 'Franz', 1)", 
+            "('Realistico', 'Fyodor', 1)", "('Clasica', 'Gabriel', 1)", "('Clasica', 'Isabel', 1)", 
+            "('Historia', 'J.K.', 1)", "('Salud', 'J.R.R.', 1)", "('Derecho', 'James', 1)", "('Salud', 'Jean-Paul', 1)", 
+            "('Clasica'Isabel', 1)", "('Historia', 'J.K.', 1)", "('Salud', 'J.R.R.', 1)", "('Derecho', 'James', 1)", 
+            "('Salud', 'Jean-Paul', 1)", "('Clas, 'John', 1)", "('Deportes', 'John', 1)", "('Realistico', 'John', 1)", 
+            "('Ficción', 'Jorge', 1)", "('Derecho', 'Kurt', 1)", "('Investigacion', 'Kurt', 1'Economía', 'Margaret', 1)",
+            "('Realistico', 'Mario', 1)", "('Ciencia', 'Mark', 1)", "('Arte', 'Octavio', 1)", "('Derecho', 'Pablo)", 
+            "('Medicina', 'Leo', 1)", "('Economía', 'Margaret', 1)", "('Realistico', 'Mario', 1)", 
+            "('Ciencia', 'Mark', 1)", "('Arte', 'Octavio', 1)"'Margaret', 1)", "('Realistico', 'Mario', 1)", 
+            "('Ciencia', 'Mark', 1)", "('Arte', 'Octavio', 1)", "('Derecho', 'Pablo', 1)", "('Derecho', 'Rainer', 1)", 
+            "('Clasica', 'Ray', 1)", "('Arte', 'Raymond', 1)", "('Matemáticas', 'Salman', 1)", 
+            "('Filosofía', 'Stephen', 1)", "('Clasica', 'Toni', 1)", "('Derecho', 'Victor', 1)", 
+            "('Educación', 'Virginia', 1)", "('Biología', 'William', 1)", "('Historia', 'William', 1)", 
+            "('Infantil', 'Zadie', 1)"]
             """
             self.comprobar_querys(query3)
         except Exception as e:
