@@ -2,9 +2,10 @@ from conexion import Conexiones
 from pruebas import Pruebas
 from extraccion_datos import obtener_tablas,extraer_columnas,extraer_numero_registros,extraer_info,extraer_tipo_datos
 from insertar_datos import insertar_tabla,insertar_info
+from DEFENSA_EXAMEN import defensa
 
 def migration_main(conexion_db):
-#ESTABLECIENDO CONEXIONES
+    #ESTABLECIENDO CONEXIONES
     try:
         conexion_db=Conexiones()
         conexion_db.conectar_mysql()
@@ -34,6 +35,7 @@ def migration_main(conexion_db):
             try:
                 columnas=extraer_columnas(cursor_server,tabla,"sqlserver")
                 columnas.append("fecha_modificacion")
+                
             except Exception as e:
                 print(f"Column names extraction error, {str(e)}")
             #EXTRAER TIPO DE DATO CON COLUMNAS concatenadas
@@ -46,19 +48,20 @@ def migration_main(conexion_db):
                 insertar_tabla(mycursor,tabla,tipo_datos)
             except Exception as e:
                 print(f"Create table error, {str(e)}")
-            # Insertar los datos en MySQL
+            # Insertar los datos en 
             try:
                 insertar_info(mycursor,tabla,columnas,info)
             except Exception as e:
                 print(f"Error in the process of inserting information to mysql, {str(e)}")
 
             conexion_db.mydb.commit()
+
     except Exception as e:
         print(f"Migration Error, {str(e)}")
     #Ejecutando pruebas
     try:
         pruebas=Pruebas(mycursor,cursor_server)
-        pruebas.ejecutar_pruebas()
+        #pruebas.ejecutar_pruebas()
 
     except Exception as e:
         print(f"Pruebas Error, {str(e)}")

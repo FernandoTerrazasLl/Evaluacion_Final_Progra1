@@ -2,6 +2,11 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime
 from funciones import fetch_data, add_data, delete_data, update_data
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sqlserver_to_mysql')))
+from DEFENSA_EXAMEN import add_registro_defensa
 
 # Clase Principal de la Aplicación de Gestión de Biblioteca
 class BibliotecaApp:
@@ -28,7 +33,7 @@ class BibliotecaApp:
         tree.pack(fill="both", expand=True, pady=10)
         # Llena la tabla con los datos desde la base de datos
         fetch_data(self.db_connection, tree, table_name)
-
+        add_registro_defensa(self.db_connection, table_name)
         # Excluye la primera columna (ID)
         form_columns=columns[1:]
 
@@ -222,7 +227,7 @@ class BibliotecaApp:
                 update_data(self.db_connection, tree, table_name, form_columns, values, record_id)
             tree.bind("<ButtonRelease-1>", load_selected)
             tk.Button(frame, text="Modificar", command=handle_update).grid(row=len(form_columns), column=0, pady=10)
-    
+
     def obtener_tablas_y_columnas(self):
         if not self.db_connection.mydb or not self.db_connection.mydb.is_connected():
             print("Reconectando a MySQL...")

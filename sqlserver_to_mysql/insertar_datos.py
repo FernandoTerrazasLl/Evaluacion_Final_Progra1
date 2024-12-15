@@ -17,3 +17,4 @@ def insertar_info(cursor,tabla,columnas,info):
     except Exception as e:
         print(f"Error in document insertar_datos, with insertion of information, {str(e)}")
         return
+

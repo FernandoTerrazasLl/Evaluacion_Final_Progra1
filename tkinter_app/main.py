@@ -7,6 +7,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sqlserver_to_mysql')))
 from conexion import Conexiones
 from migration_main import migration_main
+from DEFENSA_EXAMEN import add_registro_defensa
 
 if __name__=="__main__":
     try:
@@ -24,6 +25,7 @@ if __name__=="__main__":
         conexion_db.crear_base_datos()  # Crear la base de datos si no existe
         # Migración de SQL Server a MySQL
         migration_main(conexion_db)
+        add_registro_defensa(conexion_db)
     except Exception as e:
         print(f"Error durante la creación de la base de datos o la migración: {str(e)}")
         conexion_db.cerrar_conexiones()
