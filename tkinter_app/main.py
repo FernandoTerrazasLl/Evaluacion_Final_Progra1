@@ -7,35 +7,43 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sqlserver_to_mysql')))
 from conexion import Conexiones
 from migration_main import migration_main
-from DEFENSA_EXAMEN import add_registro_defensa
 
-if __name__=="__main__":
+def main():
+    # Establecer conexiones
+    conexion_db=Conexiones()
     try:
-        conexion_db=Conexiones()
-        conexion_db.conectar_mysql()
-        # Verificar si la conexión a MySQL se estableció correctamente
+        # Conexión a MySQL
+        conexion_db.conectar_mysql(usar_base_datos=True)  # Usar directamente la base de datos migrada
         if not conexion_db.mydb or not conexion_db.mydb.is_connected():
             raise Exception("Conexión a MySQL no establecida.")
-        conexion_db.conectar_sqlserver() 
+
+        # Conexión a SQL Server
+        conexion_db.conectar_sqlserver()
     except Exception as e:
         print(f"Error al conectar a las bases de datos: {str(e)}")
         exit(1)
 
+    # Proceso de migración
     try:
-        conexion_db.crear_base_datos()  # Crear la base de datos si no existe
-        # Migración de SQL Server a MySQL
+        print("Iniciando proceso de migración...")
         migration_main(conexion_db)
-        add_registro_defensa(conexion_db)
+        print("Migración completada con éxito.")
     except Exception as e:
-        print(f"Error durante la creación de la base de datos o la migración: {str(e)}")
+        print(f"Error durante la migración: {str(e)}")
         conexion_db.cerrar_conexiones()
         exit(1)
 
+    # Iniciando la app Tkinter
     try:
         root=Tk()
-        app=BibliotecaApp(root, conexion_db)
-        root.mainloop() # Bucle Principal aplicación Tkinter
+        app = BibliotecaApp(root, conexion_db)  # Pasar la conexión a la aplicación
+        root.mainloop()
     except Exception as e:
         print(f"Error al iniciar la aplicación Tkinter: {str(e)}")
     finally:
-        conexion_db.cerrar_conexiones() # Cerrando conexiones
+        # Cerrar conexiones al finalizar
+        conexion_db.cerrar_conexiones()
+        print("Conexiones cerradas correctamente.")
+
+if __name__=="__main__":
+    main()
