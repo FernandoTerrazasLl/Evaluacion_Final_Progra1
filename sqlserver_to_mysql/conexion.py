@@ -41,7 +41,7 @@ class Conexiones:
     def conectar_sqlserver(self):
         server = '#MODIFICAR'  # Cambia según corresponda
         database = 'BibliotecaUniversitaria'
-        username = '"MODIFICAR"'  # Cambia según corresponda
+        username = '#MODIFICAR'  # Cambia según corresponda
 
         try:
             self.serverdb = pyodbc.connect(

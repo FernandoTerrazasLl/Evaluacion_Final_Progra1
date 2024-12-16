@@ -6,32 +6,19 @@ import os
 # Configurar el acceso al módulo de migración
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sqlserver_to_mysql')))
 from conexion import Conexiones
-from migration_main import migration_main
 
 def main():
-    # Establecer conexiones
-    conexion_db=Conexiones()
     try:
-        # Conexión a MySQL
-        conexion_db.conectar_mysql(usar_base_datos=True)  # Usar directamente la base de datos migrada
-        if not conexion_db.mydb or not conexion_db.mydb.is_connected():
-            raise Exception("Conexión a MySQL no establecida.")
+        print("Iniciando migración de datos...")
 
-        # Conexión a SQL Server
+        # Crear conexión a bases de datos
+        conexion_db=Conexiones()
+        conexion_db.conectar_mysql()  # Conexión a MySQL
         conexion_db.conectar_sqlserver()
+        
+        print("Conexion a MySQL")
     except Exception as e:
-        print(f"Error al conectar a las bases de datos: {str(e)}")
-        exit(1)
-
-    # Proceso de migración
-    try:
-        print("Iniciando proceso de migración...")
-        migration_main(conexion_db)
-        print("Migración completada con éxito.")
-    except Exception as e:
-        print(f"Error durante la migración: {str(e)}")
-        conexion_db.cerrar_conexiones()
-        exit(1)
+        print(f"Error durante la conexión: {str(e)}")
 
     # Iniciando la app Tkinter
     try:
