@@ -1,5 +1,4 @@
 from conexion import Conexiones
-from pruebas import Pruebas
 from extraccion_datos import obtener_tablas,extraer_columnas,extraer_numero_registros,extraer_info,extraer_tipo_datos
 from insertar_datos import insertar_tabla,insertar_info
 from DEFENSA_EXAMEN import defensa
@@ -58,13 +57,6 @@ def migration_main(conexion_db):
 
     except Exception as e:
         print(f"Migration Error, {str(e)}")
-    #Ejecutando pruebas
-    try:
-        pruebas=Pruebas(mycursor,cursor_server)
-        #pruebas.ejecutar_pruebas()
-
-    except Exception as e:
-        print(f"Pruebas Error, {str(e)}")
 
     finally:
         #Cerrando conexiones

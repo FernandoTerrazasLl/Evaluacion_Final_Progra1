@@ -27,7 +27,7 @@ class Conexiones:
                 host="localhost",
                 user="root",
                 port='3306',
-                password='#CONTRASEÑA',  # Ajusta según sea necesario
+                password='Fernando2420',  # Ajusta según sea necesario
                 auth_plugin='mysql_native_password'
             )
             print("Conexión a MySQL establecida.")
@@ -39,9 +39,9 @@ class Conexiones:
 
     # Establece la conexión con SQL Server
     def conectar_sqlserver(self):
-        server = '#MODIFICAR'  # Cambia según corresponda
+        server = 'DESKTOP-T8BJL71'  # Cambia según corresponda
         database = 'BibliotecaUniversitaria'
-        username = '#MODIFICAR'  # Cambia según corresponda
+        username = 'DESKTOP-T8BJL71\\user'  # Cambia según corresponda
 
         try:
             self.serverdb = pyodbc.connect(

@@ -6,7 +6,7 @@ import os
 # Configurar el acceso al módulo de migración
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'sqlserver_to_mysql')))
 from conexion import Conexiones
-
+from DEFENSA_EXAMEN import add_registro_defensa
 def main():
     try:
         print("Iniciando migración de datos...")
@@ -19,7 +19,6 @@ def main():
         print("Conexion a MySQL")
     except Exception as e:
         print(f"Error durante la conexión: {str(e)}")
-
     # Iniciando la app Tkinter
     try:
         root=Tk()

@@ -4,6 +4,12 @@
 
 https://drive.google.com/file/d/12_PcxAjfm2kdZvQG32Ip40sbGtkxcUsG/view?usp=sharing
 
+## COMO USAR LOS COMANDOS?
+
+Para migrar los datos ejecuta el archivo migracion_unica de la carpeta sqlserver_to_mysql
+Para ver la interfaz ejecuta el archivo main de la carpeta tkinter_app
+Para ejecutar las pruebas ejecuta el archivo pruebas de la carpeta sqlserver_to_mysql
+
 ## **Definición del Problema**
 
 La empresa enfrenta un problema crítico de gestión de datos debido a un sistema heredado basado en tecnología obsoleta. Este sistema es lento, propenso a inconsistencias y carece de escalabilidad. La tarea consiste en diseñar e implementar un nuevo sistema utilizando bases de datos relacionales y una aplicación Python moderna que garantice eficiencia, confiabilidad y facilidad de uso.

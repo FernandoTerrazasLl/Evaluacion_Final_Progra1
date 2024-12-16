@@ -33,7 +33,6 @@ class BibliotecaApp:
         tree.pack(fill="both", expand=True, pady=10)
         # Llena la tabla con los datos desde la base de datos
         fetch_data(self.db_connection, tree, table_name)
-        add_registro_defensa(self.db_connection, table_name)
         # Excluye la primera columna (ID)
         form_columns=columns[1:]
 

@@ -2,7 +2,13 @@ import mysql.connector
 import pyodbc
 from dataclasses import dataclass
 from extraccion_datos import obtener_tablas,extraer_columnas,extraer_numero_registros,extraer_info
+from conexion import Conexiones
 
+conexion_db=Conexiones()
+conexion_db.conectar_mysql()
+conexion_db.conectar_sqlserver()
+mycursor=conexion_db.mydb.cursor()
+cursor_server=conexion_db.serverdb.cursor()
 @dataclass
 class Pruebas:
     mycursor:any
@@ -25,7 +31,7 @@ class Pruebas:
             assert registros_mysql == registros_sqlserver, f"Error en la tabla {tabla} en cantidad de registros"
             
         except Exception as e:
-            print(f"Pruebas error in comprobar_registros, {str(e)}")
+            print(f"Pruebas error in comprobar_numero_registros, {str(e)}")
             return
     #COMPRUEBA QUE LA INFORMACION DE UNA TABLA SEA IGUAL ENTRE SQLSERVER Y MYSQL
     def comprobar_contenido(self, tabla):
@@ -135,3 +141,9 @@ class Pruebas:
             print(f"Pruebas error in ejecutar_pruebas, {str(e)}")
             return
 
+try:
+    pruebas=Pruebas(mycursor,cursor_server)
+    pruebas.ejecutar_pruebas()
+
+except Exception as e:
+    print(f"Pruebas Error, {str(e)}")

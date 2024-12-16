@@ -36,7 +36,7 @@ def defensa(cursor):
         solucion.append(persona)
     return solucion
 
-def add_registro_defensa(db_connection, table_name="bibliotecario"):
+def add_registro_defensa(db_connection):
     conn = db_connection.mydb
     server=db_connection.serverdb
 
@@ -44,20 +44,20 @@ def add_registro_defensa(db_connection, table_name="bibliotecario"):
     server_cursor = server.cursor()
     #RESULTADO DE PARENTESIS A INSERTAR
     nombres = defensa(server_cursor)
-
+    cursor.execute("USE BibliotecaUniversidad")
     try:
-        cursor.execute(f"ALTER TABLE {table_name} ADD defensa VARCHAR(255)")
+        cursor.execute(f"ALTER TABLE bibliotecario ADD defensa VARCHAR(255)")
 
-        cursor.execute(f"SELECT {table_name}_id FROM {table_name}")
+        cursor.execute(f"SELECT bibliotecario_id FROM bibliotecario")
         rows = cursor.fetchall()
 
         for i, row in enumerate(rows):
             record_id = row[0]
-            cursor.execute(f"UPDATE {table_name} SET defensa = %s WHERE {table_name}_id = %s", (nombres[i], record_id))
+            cursor.execute(f"UPDATE bibliotecario SET defensa = %s WHERE bibliotecario_id = %s", (nombres[i], record_id))
         conn.commit()
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Avoiding repeating information: {e}")
     finally:
         cursor.close()
         server_cursor.close()
