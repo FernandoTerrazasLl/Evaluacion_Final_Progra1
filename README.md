@@ -6,9 +6,9 @@ https://drive.google.com/file/d/12_PcxAjfm2kdZvQG32Ip40sbGtkxcUsG/view?usp=shari
 
 ## COMO USAR LOS COMANDOS?
 
-Para migrar los datos ejecuta el archivo migracion_unica de la carpeta sqlserver_to_mysql
-Para ver la interfaz ejecuta el archivo main de la carpeta tkinter_app
-Para ejecutar las pruebas ejecuta el archivo pruebas de la carpeta sqlserver_to_mysql
+- Para migrar los datos ejecuta el archivo migracion_unica de la carpeta sqlserver_to_mysql
+- Para ver la interfaz ejecuta el archivo main de la carpeta tkinter_app
+- Para ejecutar las pruebas ejecuta el archivo pruebas de la carpeta sqlserver_to_mysql
 
 ## **Definición del Problema**
 
